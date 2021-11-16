@@ -1,0 +1,15 @@
+hparams:
+- name: n-epochs                        # the names should be kebab-cased (separated by hyphens)
+  short_name: n                         # the short names should be single lettered
+  type: int                             # just like the python types
+  required: true                        # you can mark some options as required
+  default: 10                           # even if the option is required, you can specify the defaults (for when config loaded from file)
+  help: Number of training epochs       # specify the help message wherever you can
+- name: lr
+  type: float                           # float is supported too
+  default: 1e-4
+  help: The learning rate
+- name: disable-print-config            # you can specify switches too! (boolean flags)
+  type: bool                            # the type MUST be bool
+  default: false
+  help: Should the config be printed?
