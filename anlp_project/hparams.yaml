@@ -13,3 +13,13 @@ hparams:
   type: bool                            # the type MUST be bool
   default: false
   help: Should the config be printed?
+- name: hidden_size
+  type: int
+  required: true
+  default: 256
+  help: Encoder output size (also decoder input size)
+- name: teacher_forcing_ratio
+  type: float
+  required: true
+  default: 0.5
+  help: How much teacher forcing should be used?

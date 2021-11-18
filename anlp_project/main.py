@@ -2,6 +2,7 @@ from anlp_project.config import Config
 from anlp_project.train import train_model
 from anlp_project.utils import cli_decorator
 
+
 @cli_decorator
 def anlp_project(**kwargs):
     config = Config(**kwargs)
@@ -10,6 +11,8 @@ def anlp_project(**kwargs):
 
     if kwargs["subcmd"] == "train":
         train_model(config)
+        pass
+
 
 if __name__ == "__main__":
     anlp_project()
