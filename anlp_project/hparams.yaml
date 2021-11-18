@@ -2,7 +2,6 @@ hparams:
 - name: n-epochs                        # the names should be kebab-cased (separated by hyphens)
   short_name: n                         # the short names should be single lettered
   type: int                             # just like the python types
-  required: true                        # you can mark some options as required
   default: 10                           # even if the option is required, you can specify the defaults (for when config loaded from file)
   help: Number of training epochs       # specify the help message wherever you can
 - name: lr
@@ -15,11 +14,21 @@ hparams:
   help: Should the config be printed?
 - name: hidden_size
   type: int
-  required: true
   default: 256
   help: Encoder output size (also decoder input size)
 - name: teacher_forcing_ratio
   type: float
-  required: true
   default: 0.5
   help: How much teacher forcing should be used?
+- name: max_length
+  type: float
+  default: 100
+  help: maximum number of tokens in input/output sentence
+- name: bos_token
+  type: str
+  default: <BOS>
+  help: begin sentence token
+- name: eos_token
+  type: str
+  default: <EOS>
+  help: end sentence token
