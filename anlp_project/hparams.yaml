@@ -20,6 +20,11 @@ hparams:
   type: float
   default: 0.5
   help: How much teacher forcing should be used?
+- name: min_occurances_for_vocab
+  type: int
+  default: 5
+  required: true
+  help: Minimum number of times a word must occur for it to be in vocab
 - name: max_length
   type: float
   default: 100

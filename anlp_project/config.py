@@ -1,8 +1,12 @@
+import os
 from pathlib import Path
 from pydoc import locate
 
 from rich.pretty import pprint
 from yaml import safe_load
+
+PROJECT_ROOT = Path(__name__).absolute().parent
+DATA_ROOT = Path(os.getenv("DS_DIR", str(PROJECT_ROOT / "dataset")))
 
 
 class Config:
@@ -11,6 +15,7 @@ class Config:
     disable_print_config: int
     hidden_size: int
     teacher_forcing_ratio: float
+    min_occurances_for_vocab: int
     max_length: int
     bos_token: str
     eos_token: str
