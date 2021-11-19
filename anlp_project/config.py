@@ -6,6 +6,16 @@ from yaml import safe_load
 
 
 class Config:
+    n_epochs: int
+    lr: float
+    disable_print_config: int
+    hidden_size: int
+    teacher_forcing_ratio: float
+    max_length: int
+    bos_token: str
+    eos_token: str
+    checkpoint_path: str
+
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
             self.__setattr__(k, v)

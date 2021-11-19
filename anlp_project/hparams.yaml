@@ -32,3 +32,7 @@ hparams:
   type: str
   default: <EOS>
   help: end sentence token
+- name: checkpoint_path
+  type: str
+  default: data/model.checkpoint
+  help: path to model checkpoint

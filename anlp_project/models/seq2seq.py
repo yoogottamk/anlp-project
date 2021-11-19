@@ -1,12 +1,12 @@
 import pytorch_lightning as pl
 import torch
 from torch import nn, optim
-from typing import Optional
+from anlp_project.config import Config
 from random import random
 
 
 class EncoderRNN(nn.Module):
-    def __init__(self, config, input_size):
+    def __init__(self, config: Config, input_size: int):
         super().__init__()
         self.config = config
 
@@ -20,7 +20,7 @@ class EncoderRNN(nn.Module):
 
 
 class DecoderRNN(nn.Module):
-    def __init__(self, config, output_size):
+    def __init__(self, config: Config, output_size: int):
         super().__init__()
         self.config = config
 
@@ -40,7 +40,7 @@ class DecoderRNN(nn.Module):
 
 
 class Seq2SeqRNN(pl.LightningModule):
-    def __init__(self, config, input_size, output_size):
+    def __init__(self, config: Config, input_size: int, output_size: int):
         super().__init__()
         self.config = config
         self.input_size = input_size
@@ -48,7 +48,6 @@ class Seq2SeqRNN(pl.LightningModule):
 
         self.encoder = EncoderRNN(config, input_size)
         self.decoder = DecoderRNN(config, output_size)
-
 
         # We need manual optimization because encoder optimizer is stepped
         # after we have done both the encoding/decoding step
@@ -64,7 +63,7 @@ class Seq2SeqRNN(pl.LightningModule):
         encoder_hidden = torch.zeros(
             1, 1, self.config.hidden_size, device=self.device
         )
-        encoder_outputs = torch.zeros(self.config.max_length, self.config.hidden_size, device=self.config.device)
+        encoder_outputs = torch.zeros(self.config.max_length, self.config.hidden_size, device=self.device)
 
         # an RNN works by iterating over all words one by one
         for word_index in range(input_word_count):
