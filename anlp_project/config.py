@@ -20,6 +20,7 @@ class Config:
     bos_token: str
     eos_token: str
     checkpoint_path: str
+    logfile: str
 
     def __init__(self, **kwargs):
         for k, v in kwargs.items():

@@ -1,7 +1,8 @@
-import multiprocessing
-import sqlite3
 from collections import Counter
+import logging
+import multiprocessing
 from pathlib import Path
+import sqlite3
 from typing import Tuple
 
 import numpy as np
@@ -19,7 +20,8 @@ def _word_freq_calculator(db_path, start, end):
     wf_de, wf_en = Counter(), Counter()
 
     iterator = range(start, end)
-    if start == 0:
+    is_first_worker = start == 0
+    if is_first_worker:
         iterator = tqdm(iterator, desc="[w0] Calculating word frequencies")
 
     for idx in iterator:
@@ -74,10 +76,14 @@ class EuroParl(EuroParlRaw):
         self.de_vocab_size = len(self.w2i_de)
         self.en_vocab_size = len(self.w2i_en)
 
+    # TODO: why is db_path asked for here when it was also taken in the __init__ method?
     def prepare_mappings(self, db_path: Path):
         total_size = self.len
         n_procs = multiprocessing.cpu_count()
         chunk_size = total_size // n_procs
+
+        logging.info('total_size: %d, n_procs: %d, chunk_size: %d', total_size, n_procs, chunk_size)
+
         # break up indices to be equally consumed by all processes
         # stores [start, end)
         proc_indices = [i * chunk_size for i in range(n_procs)]
@@ -85,10 +91,10 @@ class EuroParl(EuroParlRaw):
 
         # we are showing progress bar for worker 0
         # reverse the list so that worker 0 starts/ends the last
-        args = [
+        args = reversed([
             (db_path, proc_indices[i], proc_indices[i + 1])
             for i in range(len(proc_indices) - 1)
-        ][::-1]
+        ])
 
         # unk index will be 0
         wf_de, wf_en = Counter(), Counter()
@@ -106,13 +112,13 @@ class EuroParl(EuroParlRaw):
         w2i_en = {"__UNKNOWN__": 0}
 
         i = 1
-        for w, f in wf_de.items():
+        for w, f in tqdm(wf_de.items(), desc="Mapping German words to indices"):
             if f >= self.config.min_occurances_for_vocab:
                 w2i_de[w] = i
                 i += 1
 
         i = 1
-        for w, f in wf_en.items():
+        for w, f in tqdm(wf_en.items(), desc="Mapping English words to indices"):
             if f >= self.config.min_occurances_for_vocab:
                 w2i_en[w] = i
                 i += 1

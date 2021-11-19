@@ -41,3 +41,6 @@ hparams:
   type: str
   default: data/model.checkpoint
   help: path to model checkpoint
+- name: logfile
+  type: str
+  default: logs/run{}
