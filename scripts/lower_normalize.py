@@ -28,7 +28,7 @@ def process_line(line: str):
     return no_quotes + "\n"
 
 
-def count_newlines(fname):
+def count_newlines(fname: str):
     """
     modified version of https://stackoverflow.com/a/68385697
     """
@@ -43,7 +43,7 @@ def count_newlines(fname):
     return count
 
 
-def get_split_positions(n_procs, fname):
+def get_split_positions(n_procs: int, fname: str):
     """
     Find the file seek position for newline boundaries
 
@@ -96,7 +96,7 @@ def process_file_segment(index, fname, start, end):
                         break
 
 
-def process_file(n_procs, fname):
+def process_file(n_procs: int, fname: str):
     splits = get_split_positions(n_procs, fname)
     args = [(i, fname, splits[i], splits[i + 1] - 1) for i in range(n_procs)]
 

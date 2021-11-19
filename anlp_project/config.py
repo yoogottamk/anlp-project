@@ -21,6 +21,7 @@ class Config:
     eos_token: str
     checkpoint_path: str
     logfile: str
+    batch_size: int
 
     def __init__(self, **kwargs):
         for k, v in kwargs.items():

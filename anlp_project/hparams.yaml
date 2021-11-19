@@ -44,3 +44,8 @@ hparams:
 - name: logfile
   type: str
   default: logs/run{}
+  help: log file path
+- name: batch_size
+  type: int
+  default: 64
+  help: batch size used for training or validation
