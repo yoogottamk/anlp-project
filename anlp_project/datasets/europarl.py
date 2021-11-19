@@ -91,8 +91,7 @@ class EuroParl(EuroParlRaw):
         ][::-1]
 
         # unk index will be 0
-        wf_de = Counter(unk=self.config.min_occurances_for_vocab + 1)
-        wf_en = Counter(unk=self.config.min_occurances_for_vocab + 1)
+        wf_de, wf_en = Counter(), Counter()
 
         with multiprocessing.Pool(n_procs) as pool:
             local_wfs = pool.starmap(_word_freq_calculator, args)
@@ -103,16 +102,20 @@ class EuroParl(EuroParlRaw):
             wf_de += local_wf_de
             wf_en += local_wf_en
 
-        w2i_de = {
-            w: i
-            for i, (w, wf) in enumerate(wf_de.items())
-            if wf > self.config.min_occurances_for_vocab
-        }
-        w2i_en = {
-            w: i
-            for i, (w, wf) in enumerate(wf_en.items())
-            if wf > self.config.min_occurances_for_vocab
-        }
+        w2i_de = {"__UNKNOWN__": 0}
+        w2i_en = {"__UNKNOWN__": 0}
+
+        i = 1
+        for w, f in wf_de.items():
+            if f >= self.config.min_occurances_for_vocab:
+                w2i_de[w] = i
+                i += 1
+
+        i = 1
+        for w, f in wf_en.items():
+            if f >= self.config.min_occurances_for_vocab:
+                w2i_en[w] = i
+                i += 1
 
         return w2i_de, w2i_en
 
