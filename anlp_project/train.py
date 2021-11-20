@@ -1,3 +1,4 @@
+import logging
 import multiprocessing
 
 import torch
@@ -15,8 +16,10 @@ def train_model(config: Config):
     dataset = EuroParl(config=config, load_from_pickle=True)
 
     # input is English, output is German
-    input_size = dataset.en_vocab_size
-    output_size = dataset.de_vocab_size
+    input_size = dataset.de_vocab_size
+    output_size = dataset.en_vocab_size
+
+    logging.info("Input size (German vocab size): %d; Output size (English vocab): %d", input_size, output_size)
 
     model = Seq2SeqRNN(config, input_size, output_size)
 

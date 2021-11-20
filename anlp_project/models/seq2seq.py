@@ -14,9 +14,12 @@ class EncoderRNN(nn.Module):
         self.gru = nn.GRU(self.config.hidden_size, self.config.hidden_size)
 
     def forward(self, input, hidden):
+        # Input is a 1-hot tensor, we need to get the index
+        # so as to pass it to embedding
+        # TODO: change to axis=1 for batch training
+        input = input.argmax(axis=0)
         emb_i = self.embedding(input)
         emb = emb_i.view(1, 1, -1)
-        print(f"{input.shape}, {emb_i.shape}, {emb.shape}, {hidden.shape}")
         output, hidden = self.gru(emb, hidden)
         return output, hidden
 
@@ -35,6 +38,8 @@ class DecoderRNN(nn.Module):
         )
 
     def forward(self, input, hidden):
+        # TODO: change to axis=1 for batch training
+        input = input.argmax(axis=0)
         emb = self.emb_layer_with_activation(input).view(1, 1, -1)
         output, hidden = self.gru(emb, hidden)
         output = self.output_with_activation(output[0])
@@ -59,6 +64,9 @@ class Seq2SeqRNN(pl.LightningModule):
         # both input and output are tensors
         # of shape (number of tokens in sentence, embedding size)
         input_tensor, target_output_tensor = batch
+        # TODO: change for batched training
+        input_tensor = input_tensor[0]
+        target_output_tensor = target_output_tensor[0]
         input_word_count = input_tensor.size(0)
         target_word_count = target_output_tensor.size(0)
 
@@ -72,9 +80,11 @@ class Seq2SeqRNN(pl.LightningModule):
             encoder_output, encoder_hidden = self.encoder(
                 input_tensor[word_index], encoder_hidden
             )
-            encoder_outputs[word_index] = encoder_output[0, 0] # TODO: what is the meaning of [0, 0]?
+            encoder_outputs[word_index] = encoder_output[0, 0]  # TODO: what is the meaning of [0, 0]?
 
-        decoder_input = torch.tensor([[self.config.bos_token]], device=self.device)
+        # input_tensor[0] is the bos token
+        # TODO: convert to axis=1 for batched training
+        decoder_input = torch.tensor([[input_tensor[0].argmax(axis=0)]], device=self.device)
         decoder_hidden = encoder_hidden
         return decoder_input, decoder_hidden, target_output_tensor, target_word_count
 
@@ -99,7 +109,6 @@ class Seq2SeqRNN(pl.LightningModule):
                 topv, topi = decoder_output.topk(1)
                 decoder_input = topi.squeeze().detach()
                 loss += loss_function(decoder_output, target_tensor[word_index])
-
 
                 if decoder_input.item() == self.config.eos_token:
                     # breaking early: aren't we helping the loss to be low?
@@ -133,7 +142,12 @@ class Seq2SeqRNN(pl.LightningModule):
                 decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
                 topv, topi = decoder_output.topk(1)
                 decoder_input = topi.squeeze().detach()
-                loss += loss_function(decoder_output, target_tensor[word_index])
+                # TODO: batch training
+                # NLLLoss expects NXC tensor as the source and (N,) shape tensor for target
+                target_class = target_tensor[word_index].argmax(axis=0).item()
+                target_class = torch.LongTensor([target_class])
+                loss_output = loss_function(decoder_output, target_class)
+                loss += loss_output
                 if decoder_input.item() == self.config.eos_token:
                     break
 

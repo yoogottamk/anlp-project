@@ -46,7 +46,7 @@ hparams:
   help: log file path
 - name: batch_size
   type: int
-  default: 2
+  default: 1
   help: batch size used for training or validation
 - name: pickle_path
   type: str

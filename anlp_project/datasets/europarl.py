@@ -8,6 +8,7 @@ import pickle
 from os import path
 
 import numpy as np
+import torch
 from sacremoses.tokenize import MosesTokenizer
 from torch.utils.data import Dataset
 from tqdm.auto import tqdm
@@ -137,8 +138,10 @@ class EuroParl(EuroParlRaw):
     def __getitem__(self, idx: int) -> Tuple[np.ndarray, np.ndarray]:
         row = super().__getitem__(idx)
 
-        de = [self.w2i_de.get(token, 0) for token in self.de_tok.tokenize(row[0])]
-        en = [self.w2i_en.get(token, 0) for token in self.en_tok.tokenize(row[1])]
+        de_tokens = [self.config.bos_token] + self.de_tok.tokenize(row[0]) + [self.config.eos_token]
+        en_tokens = [self.config.bos_token] + self.en_tok.tokenize(row[1]) + [self.config.eos_token]
+        de = torch.LongTensor([self.w2i_de.get(token, 0) for token in de_tokens])
+        en = torch.LongTensor([self.w2i_en.get(token, 0) for token in en_tokens])
 
         assert max(len(de), len(en)) <= self.config.max_length, "You need to raise max length"
         de_1hot = np.zeros((self.config.max_length, self.de_vocab_size), dtype=int)
