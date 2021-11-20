@@ -108,7 +108,11 @@ class Seq2SeqRNN(pl.LightningModule):
                 # what does this do?
                 topv, topi = decoder_output.topk(1)
                 decoder_input = topi.squeeze().detach()
-                loss += loss_function(decoder_output, target_tensor[word_index])
+                # NLLLoss expects NXC tensor as the source and (N,) shape tensor for target
+                target_class = target_tensor[word_index].argmax(axis=0).item()
+                target_class = torch.LongTensor([target_class])
+                loss_output = loss_function(decoder_output, target_class)
+                loss += loss_output
 
                 if decoder_input.item() == self.config.eos_token:
                     # breaking early: aren't we helping the loss to be low?
@@ -121,7 +125,7 @@ class Seq2SeqRNN(pl.LightningModule):
         enc_optim.step()
         dec_optim.step()
 
-        return loss.item() / target_word_count
+        return { "train_loss": loss.item() / target_word_count }
 
     def configure_optimizers(self):
         enc_opt = optim.SGD(self.encoder.parameters(), self.config.lr)
