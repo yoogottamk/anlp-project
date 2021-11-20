@@ -141,8 +141,8 @@ cython_debug/
 
 /dataset
 
+# logs
+/lightning_logs
 /data
-
 /logs
-
 /wandb

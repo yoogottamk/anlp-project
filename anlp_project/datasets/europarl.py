@@ -1,11 +1,11 @@
-from collections import Counter
 import logging
 import multiprocessing
-from pathlib import Path
-import sqlite3
-from typing import Tuple
 import pickle
+import sqlite3
+from collections import Counter
 from os import path
+from pathlib import Path
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -63,7 +63,7 @@ class EuroParl(EuroParlRaw):
         self,
         config: Config = Config.from_file(),
         db_path: Path = DATA_ROOT / "dataset.sqlite",
-        load_from_pickle=False
+        load_from_pickle=False,
     ):
         super().__init__(db_path=db_path)
 
@@ -74,9 +74,10 @@ class EuroParl(EuroParlRaw):
         if not load_from_pickle:
             self.w2i_de, self.w2i_en = self.prepare_mappings(db_path)
         else:
-            assert path.isfile(self.config.pickle_path), \
-                "Please first pass load_from_pickle=False to gnenerate the pickle file"
-            pickle_file = open(self.config.pickle_path, 'rb')
+            assert path.isfile(
+                self.config.pickle_path
+            ), "Please first pass load_from_pickle=False to gnenerate the pickle file"
+            pickle_file = open(self.config.pickle_path, "rb")
             self.w2i_de, self.w2i_en = pickle.load(pickle_file)
             pickle_file.close()
 
@@ -89,7 +90,12 @@ class EuroParl(EuroParlRaw):
         n_procs = multiprocessing.cpu_count()
         chunk_size = total_size // n_procs
 
-        logging.info('total_size: %d, n_procs: %d, chunk_size: %d', total_size, n_procs, chunk_size)
+        logging.info(
+            "total_size: %d, n_procs: %d, chunk_size: %d",
+            total_size,
+            n_procs,
+            chunk_size,
+        )
 
         # break up indices to be equally consumed by all processes
         # stores [start, end)
@@ -98,10 +104,12 @@ class EuroParl(EuroParlRaw):
 
         # we are showing progress bar for worker 0
         # reverse the list so that worker 0 starts/ends the last
-        args = reversed([
-            (db_path, proc_indices[i], proc_indices[i + 1])
-            for i in range(len(proc_indices) - 1)
-        ])
+        args = reversed(
+            [
+                (db_path, proc_indices[i], proc_indices[i + 1])
+                for i in range(len(proc_indices) - 1)
+            ]
+        )
 
         # unk index will be 0
         wf_de, wf_en = Counter(), Counter()
@@ -115,39 +123,42 @@ class EuroParl(EuroParlRaw):
             wf_de += local_wf_de
             wf_en += local_wf_en
 
-        w2i_de = {"__UNKNOWN__": 0}
-        w2i_en = {"__UNKNOWN__": 0}
+        w2i_de = {"__UNKNOWN__": 0, self.config.bos_token: 1, self.config.eos_token: 2}
+        w2i_en = {"__UNKNOWN__": 0, self.config.bos_token: 1, self.config.eos_token: 2}
 
-        i = 1
+        i = len(w2i_de)
         for w, f in tqdm(wf_de.items(), desc="Mapping German words to indices"):
             if f >= self.config.min_occurances_for_vocab:
                 w2i_de[w] = i
                 i += 1
 
-        i = 1
+        i = len(w2i_en)
         for w, f in tqdm(wf_en.items(), desc="Mapping English words to indices"):
             if f >= self.config.min_occurances_for_vocab:
                 w2i_en[w] = i
                 i += 1
 
-        write_file = open(self.config.pickle_path, 'wb')
-        pickle.dump((w2i_de, w2i_en), write_file)
-        write_file.close()
+        with open(self.config.pickle_path, "wb") as write_file:
+            pickle.dump((w2i_de, w2i_en), write_file)
         return w2i_de, w2i_en
 
     def __getitem__(self, idx: int) -> Tuple[np.ndarray, np.ndarray]:
         row = super().__getitem__(idx)
 
-        de_tokens = [self.config.bos_token] + self.de_tok.tokenize(row[0]) + [self.config.eos_token]
-        en_tokens = [self.config.bos_token] + self.en_tok.tokenize(row[1]) + [self.config.eos_token]
-        de = torch.LongTensor([self.w2i_de.get(token, 0) for token in de_tokens])
-        en = torch.LongTensor([self.w2i_en.get(token, 0) for token in en_tokens])
+        de_tokens = (
+            [self.config.bos_token]
+            + self.de_tok.tokenize(row[0])
+            + [self.config.eos_token]
+        )
+        en_tokens = (
+            [self.config.bos_token]
+            + self.en_tok.tokenize(row[1])
+            + [self.config.eos_token]
+        )
+        de = np.array([self.w2i_de.get(token, 0) for token in de_tokens])
+        en = np.array([self.w2i_en.get(token, 0) for token in en_tokens])
 
-        assert max(len(de), len(en)) <= self.config.max_length, "You need to raise max length"
-        de_1hot = np.zeros((self.config.max_length, self.de_vocab_size), dtype=int)
-        de_1hot[np.arange(len(de)), de] = 1
+        # TODO: fix this in preprocessing
+        # assert max(len(de), len(en)) <= self.config.max_length, "You need to raise max length"
 
-        en_1hot = np.zeros((self.config.max_length, self.en_vocab_size), dtype=int)
-        en_1hot[np.arange(len(en)), en] = 1
-
-        return de_1hot, en_1hot
+        return de, en

@@ -1,9 +1,9 @@
-from datetime import datetime
 import logging
+from datetime import datetime
 
 from anlp_project.config import Config
-from anlp_project.train import train_model
 from anlp_project.inference import inference_model
+from anlp_project.train import train_model
 from anlp_project.utils import cli_decorator
 
 
