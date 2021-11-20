@@ -14,7 +14,9 @@ class EncoderRNN(nn.Module):
         self.gru = nn.GRU(self.config.hidden_size, self.config.hidden_size)
 
     def forward(self, input, hidden):
-        emb = self.embedding(input).view(1, 1, -1)
+        emb_i = self.embedding(input)
+        emb = emb_i.view(1, 1, -1)
+        print(f"{input.shape}, {emb_i.shape}, {emb.shape}, {hidden.shape}")
         output, hidden = self.gru(emb, hidden)
         return output, hidden
 
