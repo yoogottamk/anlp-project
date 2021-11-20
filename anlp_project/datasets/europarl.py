@@ -3,12 +3,10 @@ import multiprocessing
 import pickle
 import sqlite3
 from collections import Counter
-from os import path
 from pathlib import Path
 from typing import Tuple
 
 import numpy as np
-import torch
 from sacremoses.tokenize import MosesTokenizer
 from torch.utils.data import Dataset
 from tqdm.auto import tqdm
@@ -63,7 +61,7 @@ class EuroParl(EuroParlRaw):
         self,
         config: Config = Config.from_file(),
         db_path: Path = DATA_ROOT / "dataset.sqlite",
-        load_from_pickle=False,
+        force_regenerate_mappings=False,
     ):
         super().__init__(db_path=db_path)
 
@@ -71,15 +69,11 @@ class EuroParl(EuroParlRaw):
         self.de_tok = MosesTokenizer(lang="de")
         self.en_tok = MosesTokenizer()
 
-        if not load_from_pickle:
+        if force_regenerate_mappings or not Path(self.config.pickle_path).is_file():
             self.w2i_de, self.w2i_en = self.prepare_mappings(db_path)
         else:
-            assert path.isfile(
-                self.config.pickle_path
-            ), "Please first pass load_from_pickle=False to gnenerate the pickle file"
-            pickle_file = open(self.config.pickle_path, "rb")
-            self.w2i_de, self.w2i_en = pickle.load(pickle_file)
-            pickle_file.close()
+            with open(self.config.pickle_path, "rb") as pickle_file:
+                self.w2i_de, self.w2i_en = pickle.load(pickle_file)
 
         self.de_vocab_size = len(self.w2i_de)
         self.en_vocab_size = len(self.w2i_en)
@@ -138,6 +132,7 @@ class EuroParl(EuroParlRaw):
                 w2i_en[w] = i
                 i += 1
 
+        Path(self.config.pickle_path).parent.mkdir(exist_ok=True, parents=True)
         with open(self.config.pickle_path, "wb") as write_file:
             pickle.dump((w2i_de, w2i_en), write_file)
         return w2i_de, w2i_en
@@ -145,20 +140,28 @@ class EuroParl(EuroParlRaw):
     def __getitem__(self, idx: int) -> Tuple[np.ndarray, np.ndarray]:
         row = super().__getitem__(idx)
 
-        de_tokens = (
-            [self.config.bos_token]
-            + self.de_tok.tokenize(row[0])
-            + [self.config.eos_token]
-        )
-        en_tokens = (
-            [self.config.bos_token]
-            + self.en_tok.tokenize(row[1])
-            + [self.config.eos_token]
-        )
-        de = np.array([self.w2i_de.get(token, 0) for token in de_tokens])
-        en = np.array([self.w2i_en.get(token, 0) for token in en_tokens])
+        de_tokens = [
+            self.config.bos_token,
+            *self.de_tok.tokenize(row[0]),
+            self.config.eos_token,
+        ]
+        en_tokens = [
+            self.config.bos_token,
+            *self.en_tok.tokenize(row[1]),
+            self.config.eos_token,
+        ]
 
         # TODO: fix this in preprocessing
+        # TODO: eos_token might vanish
         # assert max(len(de), len(en)) <= self.config.max_length, "You need to raise max length"
+        de = np.array(
+            [self.w2i_de.get(token, 0) for token in de_tokens][: self.config.max_length]
+        )
+        en = np.array(
+            [self.w2i_en.get(token, 0) for token in en_tokens][: self.config.max_length]
+        )
 
-        return de, en
+        padded_de = np.pad(de, (0, self.config.max_length - len(de)))
+        padded_en = np.pad(en, (0, self.config.max_length - len(en)))
+
+        return padded_de, padded_en

@@ -1,5 +1,6 @@
 import logging
-from datetime import datetime
+
+from rich.logging import RichHandler
 
 from anlp_project.config import Config
 from anlp_project.inference import inference_model
@@ -11,8 +12,7 @@ from anlp_project.utils import cli_decorator
 def anlp_project(**kwargs):
     config = Config(**kwargs)
 
-    curr_time = datetime.now().isoformat()
-    logging.basicConfig(filename=config.logfile.format(curr_time), level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 
     if not kwargs.get("disable_print_config", False):
         config.dump()

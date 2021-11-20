@@ -13,7 +13,7 @@ from anlp_project.models.seq2seq import Seq2SeqRNN
 
 
 def train_model(config: Config):
-    dataset = EuroParl(config=config, load_from_pickle=True)
+    dataset = EuroParl(config=config)
 
     # input is English, output is German
     input_size = dataset.de_vocab_size
@@ -46,7 +46,7 @@ def train_model(config: Config):
         test_data, batch_size=config.batch_size, num_workers=cpu_count
     )
 
-    wandb_logger = WandbLogger()
+    wandb_logger = WandbLogger(offline=True)
     # checkpointing is enabled by default, but where are the checkpoints saved?
-    trainer = Trainer(logger=wandb_logger)
+    trainer = Trainer(logger=wandb_logger, gpus=-1)
     trainer.fit(model, train_dataloader, val_dataloader)
