@@ -4,6 +4,8 @@ import multiprocessing
 from pathlib import Path
 import sqlite3
 from typing import Tuple
+import pickle
+from os import path
 
 import numpy as np
 from sacremoses.tokenize import MosesTokenizer
@@ -60,7 +62,7 @@ class EuroParl(EuroParlRaw):
         self,
         config: Config = Config.from_file(),
         db_path: Path = DATA_ROOT / "dataset.sqlite",
-        mapping_data_path=None,
+        load_from_pickle=False
     ):
         super().__init__(db_path=db_path)
 
@@ -68,10 +70,14 @@ class EuroParl(EuroParlRaw):
         self.de_tok = MosesTokenizer(lang="de")
         self.en_tok = MosesTokenizer()
 
-        if mapping_data_path is None:
+        if not load_from_pickle:
             self.w2i_de, self.w2i_en = self.prepare_mappings(db_path)
         else:
-            raise NotImplementedError("Need to pickle these and save and load")
+            assert path.isfile(self.config.pickle_path), \
+                "Please first pass load_from_pickle=False to gnenerate the pickle file"
+            pickle_file = open(self.config.pickle_path, 'rb')
+            self.w2i_de, self.w2i_en = pickle.load(pickle_file)
+            pickle_file.close()
 
         self.de_vocab_size = len(self.w2i_de)
         self.en_vocab_size = len(self.w2i_en)
@@ -123,6 +129,9 @@ class EuroParl(EuroParlRaw):
                 w2i_en[w] = i
                 i += 1
 
+        write_file = open(self.config.pickle_path, 'wb')
+        pickle.dump((w2i_de, w2i_en), write_file)
+        write_file.close()
         return w2i_de, w2i_en
 
     def __getitem__(self, idx: int) -> Tuple[np.ndarray, np.ndarray]:
@@ -131,10 +140,11 @@ class EuroParl(EuroParlRaw):
         de = [self.w2i_de.get(token, 0) for token in self.de_tok.tokenize(row[0])]
         en = [self.w2i_en.get(token, 0) for token in self.en_tok.tokenize(row[1])]
 
-        de_1hot = np.zeros((len(de), self.de_vocab_size))
+        assert max(len(de), len(en)) <= self.config.max_length, "You need to raise max length"
+        de_1hot = np.zeros((self.config.max_length, self.de_vocab_size), dtype=int)
         de_1hot[np.arange(len(de)), de] = 1
 
-        en_1hot = np.zeros((len(en), self.en_vocab_size))
+        en_1hot = np.zeros((self.config.max_length, self.en_vocab_size), dtype=int)
         en_1hot[np.arange(len(en)), en] = 1
 
         return de_1hot, en_1hot

@@ -23,11 +23,10 @@ hparams:
 - name: min_occurances_for_vocab
   type: int
   default: 5
-  required: true
   help: Minimum number of times a word must occur for it to be in vocab
 - name: max_length
-  type: float
-  default: 100
+  type: int
+  default: 75
   help: maximum number of tokens in input/output sentence
 - name: bos_token
   type: str
@@ -39,7 +38,7 @@ hparams:
   help: end sentence token
 - name: checkpoint_path
   type: str
-  default: data/model.checkpoint
+  default:
   help: path to model checkpoint
 - name: logfile
   type: str
@@ -47,5 +46,9 @@ hparams:
   help: log file path
 - name: batch_size
   type: int
-  default: 64
+  default: 2
   help: batch size used for training or validation
+- name: pickle_path
+  type: str
+  default: data/w2i.obj
+  help: path to the words to index mapping

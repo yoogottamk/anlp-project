@@ -22,6 +22,7 @@ class Config:
     checkpoint_path: str
     logfile: str
     batch_size: int
+    pickle_path: str
 
     def __init__(self, **kwargs):
         for k, v in kwargs.items():

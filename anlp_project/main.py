@@ -12,7 +12,7 @@ def anlp_project(**kwargs):
     config = Config(**kwargs)
 
     curr_time = datetime.now().isoformat()
-    logging.basicConfig(filename=config.logfile.format(curr_time), level=logging.WARNING)
+    logging.basicConfig(filename=config.logfile.format(curr_time), level=logging.DEBUG)
 
     if not kwargs.get("disable_print_config", False):
         config.dump()
