@@ -63,6 +63,8 @@ class Seq2SeqRNN(pl.LightningModule):
     def move_encoder_forward(self, batch):
         input_tensor, target_output_tensor = batch[0], batch[1]
         batch_size = input_tensor.size(0)
+        # first token of first sentence in the batch
+        bos_token = input_tensor[0, 0]
 
         # inputs and targets have been padded
         wc = input_tensor.size(1)
@@ -81,13 +83,9 @@ class Seq2SeqRNN(pl.LightningModule):
             )
             encoder_outputs[word_index] = encoder_output[
                 0, 0
-            ]  # TODO: what is the meaning of [0, 0]?
+            ]  # TODO: why exactly do we need [0, 0] here?
 
-        # input_tensor[0] is the bos token
-        # TODO: convert to axis=1 for batched training
-        decoder_input = torch.tensor(
-            [[input_tensor[0].argmax(axis=0)]], device=self.device
-        )
+        decoder_input = torch.tensor([[bos_token]], device=self.device)
         decoder_hidden = encoder_hidden
         return (
             decoder_input,
@@ -95,6 +93,28 @@ class Seq2SeqRNN(pl.LightningModule):
             target_output_tensor,
             self.config.max_length,
         )
+
+    def _move_decoder_forward(self, decoder_input, decoder_hidden, target_tensor, target_word_count):
+        loss_function = nn.NLLLoss()
+        loss = 0
+
+        for word_index in range(target_word_count):
+            decoder_output, decoder_hidden = self.decoder(
+                decoder_input, decoder_hidden
+            )
+            # what does this do?
+            topv, topi = decoder_output.topk(1)
+            decoder_input = topi.squeeze().detach()
+            # NLLLoss expects NXC tensor as the source and (N,) shape tensor for target
+            loss += loss_function(decoder_output, target_tensor[word_index])
+
+            if decoder_input.item() == self.config.eos_token:
+                # breaking early: aren't we helping the loss to be low?
+                # because in the end we're diving by target_word_count
+                # instead of the word count we actually outputted
+                break
+
+        return loss
 
     def training_step(self, batch, _batch_idx):
         enc_optim, dec_optim = self.optimizers()
@@ -108,9 +128,8 @@ class Seq2SeqRNN(pl.LightningModule):
         use_teacher_forcing = random() < self.config.teacher_forcing_ratio
         loss = 0
 
-        loss_function = nn.NLLLoss()
-
         if use_teacher_forcing:
+            loss_function = nn.NLLLoss()
             for word_index in range(target_word_count):
                 decoder_output, decoder_hidden = self.decoder(
                     decoder_input, decoder_hidden
@@ -118,21 +137,7 @@ class Seq2SeqRNN(pl.LightningModule):
                 decoder_input = target_tensor[word_index]
                 loss += loss_function(decoder_output, target_tensor[word_index])
         else:
-            for word_index in range(target_word_count):
-                decoder_output, decoder_hidden = self.decoder(
-                    decoder_input, decoder_hidden
-                )
-                # what does this do?
-                topv, topi = decoder_output.topk(1)
-                decoder_input = topi.squeeze().detach()
-                # NLLLoss expects NXC tensor as the source and (N,) shape tensor for target
-                loss += loss_function(decoder_output, target_tensor[word_index])
-
-                if decoder_input.item() == self.config.eos_token:
-                    # breaking early: aren't we helping the loss to be low?
-                    # because in the end we're diving by target_word_count
-                    # instead of the word count we actually outputted
-                    break
+            loss = self._move_decoder_forward(decoder_input, decoder_hidden, target_tensor, target_word_count)
 
         loss.backward()
 
@@ -157,22 +162,6 @@ class Seq2SeqRNN(pl.LightningModule):
                 target_word_count,
             ) = self.move_encoder_forward(batch)
 
-            loss = 0
-
-            loss_function = nn.NLLLoss()
-
-            for word_index in range(target_word_count):
-                decoder_output, decoder_hidden = self.decoder(
-                    decoder_input, decoder_hidden
-                )
-                topv, topi = decoder_output.topk(1)
-                decoder_input = topi.squeeze().detach()
-                # TODO: batch training
-                # NLLLoss expects NXC tensor as the source and (N,) shape tensor for target
-                loss += loss_function(
-                    *self._get_loss(decoder_output, target_tensor[word_index])
-                )
-                if decoder_input.item() == self.config.eos_token:
-                    break
+            loss = self._move_decoder_forward(decoder_input, decoder_hidden, target_tensor, target_word_count)
 
             return loss.item() / target_word_count
