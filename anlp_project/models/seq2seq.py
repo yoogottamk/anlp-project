@@ -12,7 +12,9 @@ class EncoderRNN(nn.Module):
         super().__init__()
         self.config = config
 
-        self.embedding = nn.Embedding(input_size, self.config.hidden_size)
+        self.embedding = nn.Embedding(
+            input_size, self.config.hidden_size, padding_idx=0
+        )
         self.gru = nn.GRU(self.config.hidden_size, self.config.hidden_size)
 
     def forward(self, input, hidden):
@@ -32,7 +34,7 @@ class DecoderRNN(nn.Module):
         self.config = config
 
         self.emb_layer_with_activation = nn.Sequential(
-            nn.Embedding(output_size, self.config.hidden_size), nn.ReLU()
+            nn.Embedding(output_size, self.config.hidden_size, padding_idx=0), nn.ReLU()
         )
         self.gru = nn.GRU(self.config.hidden_size, self.config.hidden_size)
         self.output_with_activation = nn.Sequential(
@@ -87,7 +89,9 @@ class Seq2SeqRNN(pl.LightningModule):
                 0, 0
             ]  # TODO: why exactly do we need [0, 0] here?
 
-        decoder_input = torch.full((self.config.batch_size, 1), bos_token, device=self.device)
+        decoder_input = torch.full(
+            (self.config.batch_size, 1), bos_token, device=self.device
+        )
         decoder_hidden = encoder_hidden
         return (
             decoder_input,
@@ -96,14 +100,14 @@ class Seq2SeqRNN(pl.LightningModule):
             self.config.max_length,
         )
 
-    def _move_decoder_forward(self, decoder_input, decoder_hidden, target_tensor, target_word_count):
+    def _move_decoder_forward(
+        self, decoder_input, decoder_hidden, target_tensor, target_word_count
+    ):
         loss_function = nn.NLLLoss()
         loss = 0
 
         for word_index in range(target_word_count):
-            decoder_output, decoder_hidden = self.decoder(
-                decoder_input, decoder_hidden
-            )
+            decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
             # what does this do?
             topv, topi = decoder_output.topk(1)
             decoder_input = topi.squeeze().detach()
@@ -140,7 +144,9 @@ class Seq2SeqRNN(pl.LightningModule):
                 decoder_input = target_tensor[word_index]
                 loss += loss_function(decoder_output, target_tensor[word_index])
         else:
-            loss = self._move_decoder_forward(decoder_input, decoder_hidden, target_tensor, target_word_count)
+            loss = self._move_decoder_forward(
+                decoder_input, decoder_hidden, target_tensor, target_word_count
+            )
 
         loss.backward()
 
@@ -165,6 +171,8 @@ class Seq2SeqRNN(pl.LightningModule):
                 target_word_count,
             ) = self.move_encoder_forward(batch)
 
-            loss = self._move_decoder_forward(decoder_input, decoder_hidden, target_tensor, target_word_count)
+            loss = self._move_decoder_forward(
+                decoder_input, decoder_hidden, target_tensor, target_word_count
+            )
 
             return loss.item() / target_word_count
