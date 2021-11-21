@@ -1,4 +1,5 @@
 from random import random
+from typing import Tuple, List
 
 import pytorch_lightning as pl
 import torch
@@ -110,7 +111,7 @@ class Seq2SeqRNN(pl.LightningModule):
         # after we have done both the encoding/decoding step
         self.automatic_optimization = False
 
-    def _move_encoder_forward(self, batch):
+    def _move_encoder_forward(self, batch: Tuple[torch.LongTensor, torch.LongTensor]):
         input_tensor, target_output_tensor = batch[0], batch[1]
         batch_size = input_tensor.size(0)
         # first token of first sentence in the batch
@@ -244,3 +245,32 @@ class Seq2SeqRNN(pl.LightningModule):
 
         self.log("validation_loss", val_loss, on_step=True, on_epoch=True)
         return val_loss
+
+    def evaluate(self, input_sentence: List[int]):
+        batch = (None, None)
+        # assert batch size is 1
+        (
+            decoder_input,
+            decoder_hidden,
+            target_tensor,
+            target_word_count,
+            encoder_outputs,
+        ) = self._move_encoder_forward(batch)
+
+        decoded_words = []
+        decoder_attentions = torch.zeros(self.config.max_length, self.config.max_length)
+
+        for word_index in range(self.config.max_length):
+            decoder_output, decoder_hidden, decoder_attention = self.decoder(
+                decoder_input, decoder_hidden, encoder_outputs)
+            decoder_attentions[word_index] = decoder_attention.data
+            topv, topi = decoder_output.data.topk(1)
+            if topi.item() == self.config.eos_token:
+                decoded_words.append('<EOS>')
+                break
+            else:
+                decoded_words.append(topi.item())
+
+            decoder_input = topi.squeeze().detach()
+
+        return decoded_words
