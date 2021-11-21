@@ -80,7 +80,7 @@ class EuroParl(EuroParlRaw):
 
     # TODO: why is db_path asked for here when it was also taken in the __init__ method?
     def prepare_mappings(self, db_path: Path):
-        total_size = self.len
+        total_size = len(self)
         n_procs = multiprocessing.cpu_count()
         chunk_size = total_size // n_procs
 

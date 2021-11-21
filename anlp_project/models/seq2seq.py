@@ -65,6 +65,8 @@ class Seq2SeqRNN(pl.LightningModule):
         batch_size = input_tensor.size(0)
         # first token of first sentence in the batch
         bos_token = input_tensor[0, 0]
+        # sanity check
+        assert bos_token == 1, "What is the value of bos token in w2i_en?"
 
         # inputs and targets have been padded
         wc = input_tensor.size(1)
@@ -85,7 +87,7 @@ class Seq2SeqRNN(pl.LightningModule):
                 0, 0
             ]  # TODO: why exactly do we need [0, 0] here?
 
-        decoder_input = torch.tensor([[bos_token]], device=self.device)
+        decoder_input = torch.full((self.config.batch_size, 1), bos_token, device=self.device)
         decoder_hidden = encoder_hidden
         return (
             decoder_input,
@@ -105,8 +107,9 @@ class Seq2SeqRNN(pl.LightningModule):
             # what does this do?
             topv, topi = decoder_output.topk(1)
             decoder_input = topi.squeeze().detach()
+
             # NLLLoss expects NXC tensor as the source and (N,) shape tensor for target
-            loss += loss_function(decoder_output, target_tensor[word_index])
+            loss += loss_function(decoder_output, target_tensor[:, word_index])
 
             if decoder_input.item() == self.config.eos_token:
                 # breaking early: aren't we helping the loss to be low?
