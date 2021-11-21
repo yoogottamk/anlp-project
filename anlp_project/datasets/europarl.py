@@ -41,7 +41,7 @@ class EuroParlRaw(Dataset):
         super().__init__()
         self.db_path = db_path
         conn = sqlite3.connect(self.db_path, check_same_thread=False)
-        self.__len = int(
+        self._len = int(
             conn.cursor().execute("select count(*) from dataset").fetchone()[0]
         )
 
@@ -55,7 +55,7 @@ class EuroParlRaw(Dataset):
         return row
 
     def __len__(self) -> int:
-        return self.__len
+        return self._len
 
 
 class EuroParl(EuroParlRaw):
@@ -68,6 +68,8 @@ class EuroParl(EuroParlRaw):
         super().__init__(db_path=db_path)
 
         self.config = config
+        self._len = int(self._len * self.config.dataset_fraction)
+
         self.de_tok = MosesTokenizer(lang="de")
         self.en_tok = MosesTokenizer()
 
