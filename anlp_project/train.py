@@ -47,8 +47,10 @@ def train_model(config: Config):
     )
 
     wandb_logger = WandbLogger(offline=True)
-    # checkpointing is enabled by default, but where are the checkpoints saved?
+
+    # -1 implies use all GPUs available
+    gpu_count = -1 if torch.cuda.is_available() else 0
     trainer = Trainer(
-        logger=wandb_logger, max_epochs=config.n_epochs, min_epochs=1, gpus=-1
+        logger=wandb_logger, max_epochs=config.n_epochs, min_epochs=1, gpus=gpu_count
     )
     trainer.fit(model, train_dataloader, val_dataloader)
