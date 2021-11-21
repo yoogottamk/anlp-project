@@ -76,7 +76,6 @@ class Seq2SeqRNN(pl.LightningModule):
         encoder_hidden = torch.zeros(
             1, batch_size, self.config.hidden_size, device=self.device
         )
-        # TODO: encoder_outputs are needed for attention
 
         # an RNN works by iterating over all words one by one
         for word_index in range(wc):
@@ -85,7 +84,7 @@ class Seq2SeqRNN(pl.LightningModule):
             )
 
         decoder_input = torch.full(
-            (self.config.batch_size, 1), bos_token, device=self.device
+            (batch_size, 1), bos_token, device=self.device
         )
         decoder_hidden = encoder_hidden
         return (
@@ -129,13 +128,11 @@ class Seq2SeqRNN(pl.LightningModule):
         if use_teacher_forcing:
             loss_function = nn.NLLLoss()
             for word_index in range(target_word_count):
-                # TODO: is this off by 1?
-                # are we setting input to what we're trying to predict??
-                decoder_input = target_tensor[:, word_index]
                 decoder_output, decoder_hidden = self.decoder(
                     decoder_input, decoder_hidden
                 )
                 loss += loss_function(decoder_output, target_tensor[:, word_index])
+                decoder_input = target_tensor[:, word_index]
         else:
             loss = self._move_decoder_forward(
                 decoder_input, decoder_hidden, target_tensor, target_word_count
