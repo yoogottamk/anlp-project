@@ -88,7 +88,7 @@ class Seq2SeqRNN(pl.LightningModule):
         # after we have done both the encoding/decoding step
         self.automatic_optimization = False
 
-    def move_encoder_forward(self, batch):
+    def _move_encoder_forward(self, batch):
         input_tensor, target_output_tensor = batch[0], batch[1]
         batch_size = input_tensor.size(0)
         # first token of first sentence in the batch
@@ -115,15 +115,14 @@ class Seq2SeqRNN(pl.LightningModule):
             # may need to change for batched training
             encoder_outputs[word_index] = encoder_output[0, 0]
 
-        decoder_input = torch.full(
-            (batch_size, 1), bos_token, device=self.device
-        )
+        decoder_input = torch.full((batch_size, 1), bos_token, device=self.device)
         decoder_hidden = encoder_hidden
         return (
             decoder_input,
             decoder_hidden,
             target_output_tensor,
             self.config.max_length,
+            encoder_outputs,
         )
 
     def _move_decoder_forward(
@@ -157,7 +156,8 @@ class Seq2SeqRNN(pl.LightningModule):
             decoder_hidden,
             target_tensor,
             target_word_count,
-        ) = self.move_encoder_forward(batch)
+            encoder_outputs,
+        ) = self._move_encoder_forward(batch)
 
         use_teacher_forcing = random() < self.config.teacher_forcing_ratio
         loss = 0
@@ -165,14 +165,18 @@ class Seq2SeqRNN(pl.LightningModule):
         if use_teacher_forcing:
             loss_function = nn.NLLLoss()
             for word_index in range(target_word_count):
-                decoder_output, decoder_hidden = self.decoder(
-                    decoder_input, decoder_hidden
+                decoder_output, decoder_hidden, _ = self.decoder(
+                    decoder_input, decoder_hidden, encoder_outputs
                 )
                 loss += loss_function(decoder_output, target_tensor[:, word_index])
                 decoder_input = target_tensor[:, word_index]
         else:
             loss = self._move_decoder_forward(
-                decoder_input, decoder_hidden, target_tensor, target_word_count
+                decoder_input,
+                decoder_hidden,
+                target_tensor,
+                target_word_count,
+                encoder_outputs,
             )
 
         loss.backward()
@@ -196,10 +200,15 @@ class Seq2SeqRNN(pl.LightningModule):
                 decoder_hidden,
                 target_tensor,
                 target_word_count,
-            ) = self.move_encoder_forward(batch)
+                encoder_outputs,
+            ) = self._move_encoder_forward(batch)
 
             loss = self._move_decoder_forward(
-                decoder_input, decoder_hidden, target_tensor, target_word_count
+                decoder_input,
+                decoder_hidden,
+                target_tensor,
+                target_word_count,
+                encoder_outputs,
             )
 
-            return loss.item() / target_word_count
+            return {"validation_loss": loss.item() / target_word_count}
