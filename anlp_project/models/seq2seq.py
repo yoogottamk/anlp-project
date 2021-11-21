@@ -83,9 +83,7 @@ class Seq2SeqRNN(pl.LightningModule):
                 input_tensor[:, word_index], encoder_hidden
             )
 
-        decoder_input = torch.full(
-            (batch_size, 1), bos_token, device=self.device
-        )
+        decoder_input = torch.full((batch_size, 1), bos_token, device=self.device)
         decoder_hidden = encoder_hidden
         return (
             decoder_input,
@@ -143,7 +141,10 @@ class Seq2SeqRNN(pl.LightningModule):
         enc_optim.step()
         dec_optim.step()
 
-        return {"train_loss": loss.item() / target_word_count}
+        train_loss = loss.item() / target_word_count
+
+        self.log("train_loss", train_loss, on_step=True, on_epoch=True)
+        return {"train_loss": train_loss}
 
     def configure_optimizers(self):
         enc_opt = optim.SGD(self.encoder.parameters(), self.config.lr)
@@ -152,17 +153,18 @@ class Seq2SeqRNN(pl.LightningModule):
         return enc_opt, dec_opt
 
     def validation_step(self, batch, batch_idx):
-        # we don't want to train/backprop
-        with torch.no_grad():
-            (
-                decoder_input,
-                decoder_hidden,
-                target_tensor,
-                target_word_count,
-            ) = self.move_encoder_forward(batch)
+        (
+            decoder_input,
+            decoder_hidden,
+            target_tensor,
+            target_word_count,
+        ) = self.move_encoder_forward(batch)
 
-            loss = self._move_decoder_forward(
-                decoder_input, decoder_hidden, target_tensor, target_word_count
-            )
+        loss = self._move_decoder_forward(
+            decoder_input, decoder_hidden, target_tensor, target_word_count
+        )
 
-            return loss.item() / target_word_count
+        val_loss = loss.item() / target_word_count
+
+        self.log("validation_loss", val_loss, on_step=True, on_epoch=True)
+        return val_loss
