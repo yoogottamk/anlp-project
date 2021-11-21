@@ -40,7 +40,7 @@ class EuroParlRaw(Dataset):
     def __init__(self, db_path=DATA_ROOT / "dataset.sqlite"):
         super().__init__()
         self._conn = sqlite3.connect(db_path)
-        self.len = int(
+        self.__len = int(
             self._conn.cursor().execute("select count(*) from dataset").fetchone()[0]
         )
 
@@ -53,7 +53,7 @@ class EuroParlRaw(Dataset):
         return row
 
     def __len__(self) -> int:
-        return self.len
+        return self.__len
 
 
 class EuroParl(EuroParlRaw):

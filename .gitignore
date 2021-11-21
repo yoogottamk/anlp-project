@@ -146,3 +146,6 @@ cython_debug/
 /data
 /logs
 /wandb
+
+# this contains the model checkpoints
+/anlp-project-nmt
