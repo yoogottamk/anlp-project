@@ -12,7 +12,12 @@ from anlp_project.utils import cli_decorator
 def anlp_project(**kwargs):
     config = Config(**kwargs)
 
-    logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(message)s",
+        datefmt="[%X]",
+        handlers=[RichHandler()],
+    )
 
     if not kwargs.get("disable_print_config", False):
         config.dump()

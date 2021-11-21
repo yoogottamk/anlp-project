@@ -3,3 +3,4 @@ pytorch-lightning
 rich
 click
 sacremoses
+black
