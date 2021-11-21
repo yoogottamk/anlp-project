@@ -116,7 +116,7 @@ class Seq2SeqRNN(pl.LightningModule):
             encoder_outputs[word_index] = encoder_output[0, 0]
 
         decoder_input = torch.full(
-            (self.config.batch_size, 1), bos_token, device=self.device
+            (batch_size, 1), bos_token, device=self.device
         )
         decoder_hidden = encoder_hidden
         return (
