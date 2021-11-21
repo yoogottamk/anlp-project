@@ -1,6 +1,7 @@
 from functools import wraps
 from pathlib import Path
 from pydoc import locate
+import os
 
 import click
 import yaml
@@ -50,3 +51,7 @@ def cli_decorator(f):
         return _f(*args, **kwargs)
 
     return __cli_decorator
+
+
+def get_checkpoint_dir(config):
+    return config.checkpoint_path or str(Path(os.getcwd()) / "checkpoints")

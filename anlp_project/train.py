@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader, random_split
 from anlp_project.config import Config
 from anlp_project.datasets.europarl import EuroParl
 from anlp_project.models.seq2seq import Seq2SeqRNN
+from anlp_project.utils import get_checkpoint_dir
 
 
 def train_model(config: Config):
@@ -51,11 +52,12 @@ def train_model(config: Config):
 
     # -1 implies use all GPUs available
     gpu_count = -1 if torch.cuda.is_available() else 0
+    checkpoint_path = get_checkpoint_dir(config)
     trainer = Trainer(
         logger=wandb_logger,
         max_epochs=config.n_epochs,
         gpus=gpu_count,
         strategy="ddp",
-        default_root_dir=str(Path(os.getcwd()) / "checkpoints")
+        default_root_dir=checkpoint_path
     )
     trainer.fit(model, train_dataloader, val_dataloader)

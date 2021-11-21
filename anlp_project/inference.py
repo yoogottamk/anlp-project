@@ -18,25 +18,8 @@ def inference_model(config: Config):
         output_size,
     )
 
-    model = Seq2SeqRNN(config, input_size, output_size)
-
-    total_entries = len(dataset)
-    train_ratio = 0.8
-    train_length = int(total_entries * train_ratio)
-    test_length = total_entries - train_length
-
-    cpu_count = int(os.getenv("SLURM_CPUS_ON_NODE", str(multiprocessing.cpu_count())))
-
-    # -1 implies use all GPUs available
-    gpu_count = -1 if torch.cuda.is_available() else 0
-    trainer = Trainer(
-        logger=wandb_logger,
-        max_epochs=config.n_epochs,
-        min_epochs=1,
-        gpus=gpu_count,
-        strategy="ddp",
-    )
-    # load the test dataset
-    # load the trained model
-    # run the trained model on inputs
-    ...
+    # TODO: get checkpoint path from argument
+    checkpoint_path = ''
+    model = Seq2SeqRNN.load_from_checkpoint(checkpoint_path)
+    logging.info('Parameters of loaded model: learning rate: %f', model.learning_rate)
+    model.eval()
