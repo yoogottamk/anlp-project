@@ -115,12 +115,6 @@ class Seq2SeqRNN(pl.LightningModule):
             # NLLLoss expects NXC tensor as the source and (N,) shape tensor for target
             loss += loss_function(decoder_output, target_tensor[:, word_index])
 
-            if decoder_input.item() == self.config.eos_token:
-                # breaking early: aren't we helping the loss to be low?
-                # because in the end we're diving by target_word_count
-                # instead of the word count we actually outputted
-                break
-
         return loss
 
     def training_step(self, batch, _batch_idx):
