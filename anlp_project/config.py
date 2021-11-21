@@ -23,6 +23,7 @@ class Config:
     logfile: str
     batch_size: int
     pickle_path: str
+    dropout: float
 
     def __init__(self, **kwargs):
         for k, v in kwargs.items():

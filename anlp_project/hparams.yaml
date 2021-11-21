@@ -52,3 +52,7 @@ hparams:
   type: str
   default: data/w2i.obj
   help: path to the words to index mapping
+- name: dropout
+  type: float
+  default: 0.1
+  help: percent of nodes to dropout in decoder
