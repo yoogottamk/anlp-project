@@ -100,10 +100,10 @@ class Seq2SeqRNN(pl.LightningModule):
 
         for word_index in range(target_word_count):
             decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
-            # TODO: what does this do?
-            # looks like this for attention?
-            topv, topi = decoder_output.topk(1)
-            decoder_input = topi.squeeze().detach()
+            # decoder output is of shape (batch_size, outputsize)
+            topv, topi = decoder_output[:, ].topk(1)
+            decoder_input = topi.squeeze().unsqueeze(1).detach()
+            # now decoder input is of shape (batch_size, 1)
 
             # NLLLoss expects NXC tensor as the source and (N,) shape tensor for target
             loss += loss_function(decoder_output, target_tensor[:, word_index])
