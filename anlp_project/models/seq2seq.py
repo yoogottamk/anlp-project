@@ -102,8 +102,9 @@ class Seq2SeqRNN(pl.LightningModule):
         encoder_hidden = torch.zeros(
             1, batch_size, self.config.hidden_size, device=self.device
         )
+        # (batchsize, sentence max length, attention vector size (hidden size))
         encoder_outputs = torch.zeros(
-            self.config.max_length, self.config.hidden_size, device=self.device
+            batch_size, self.config.max_length, self.config.hidden_size, device=self.device
         )
 
         # an RNN works by iterating over all words one by one
@@ -111,9 +112,8 @@ class Seq2SeqRNN(pl.LightningModule):
             encoder_output, encoder_hidden = self.encoder(
                 input_tensor[:, word_index], encoder_hidden
             )
-            # TODO: What is the importance of [0, 0]?
-            # may need to change for batched training
-            encoder_outputs[word_index] = encoder_output[0, 0]
+            # shape of encoder_output is (1, batchsize, hiddensize)
+            encoder_outputs[:, word_index, :] = encoder_output[0, :, :]
 
         decoder_input = torch.full((batch_size, 1), bos_token, device=self.device)
         decoder_hidden = encoder_hidden
