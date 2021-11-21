@@ -66,7 +66,7 @@ class AttentionDecoderRNN(nn.Module):
         # bmm == batch matrix matrix product
         attn_applied = torch.bmm(
             attn_weights, encoder_outputs
-        )
+        ).view(1, batch_size, -1)
 
         output = torch.cat((emb[0], attn_applied[0]), 1)
         output = self.attn_combine(output).unsqueeze(0)
