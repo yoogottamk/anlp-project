@@ -59,9 +59,13 @@ class AttentionDecoderRNN(nn.Module):
         emb = self.dropout(emb)
 
         attn_weights = F.softmax(self.attn(torch.cat((emb[0], hidden[0]), 1)), dim=1)
+        # shapes checked from official colab notebook
+        # attn weights = (batch, 1, max length of sentence)
+        # encoder_outputs = (batch, max length of sentence, hidden size)
+        attn_weights = attn_weights.unsqueeze(1)
         # bmm == batch matrix matrix product
         attn_applied = torch.bmm(
-            attn_weights.unsqueeze(0), encoder_outputs.unsqueeze(0)
+            attn_weights, encoder_outputs
         )
 
         output = torch.cat((emb[0], attn_applied[0]), 1)
