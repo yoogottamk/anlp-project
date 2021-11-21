@@ -2,7 +2,6 @@ hparams:
 - name: n-epochs                        # the names should be kebab-cased (separated by hyphens)
   short_name: n                         # the short names should be single lettered
   type: int                             # just like the python types
-  required: true                        # you can mark some options as required
   default: 10                           # even if the option is required, you can specify the defaults (for when config loaded from file)
   help: Number of training epochs       # specify the help message wherever you can
 - name: lr
@@ -13,3 +12,43 @@ hparams:
   type: bool                            # the type MUST be bool
   default: false
   help: Should the config be printed?
+- name: hidden-size
+  type: int
+  default: 256
+  help: Encoder output size (also decoder input size)
+- name: teacher-forcing-ratio
+  type: float
+  default: 0.5
+  help: How much teacher forcing should be used?
+- name: min-occurances-for-vocab
+  type: int
+  default: 5
+  help: Minimum number of times a word must occur for it to be in vocab
+- name: max-length
+  type: int
+  default: 100
+  help: maximum number of tokens in input/output sentence
+- name: bos-token
+  type: str
+  default: <BOS>
+  help: begin sentence token
+- name: eos-token
+  type: str
+  default: <EOS>
+  help: end sentence token
+- name: checkpoint-path
+  type: str
+  default:
+  help: path to model checkpoint
+- name: logfile
+  type: str
+  default: logs/run{}
+  help: log file path
+- name: batch-size
+  type: int
+  default: 16
+  help: batch size used for training or validation
+- name: pickle-path
+  type: str
+  default: data/w2i.obj
+  help: path to the words to index mapping
