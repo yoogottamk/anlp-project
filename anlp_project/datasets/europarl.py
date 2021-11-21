@@ -143,21 +143,17 @@ class EuroParl(EuroParlRaw):
         de_tokens = [
             self.config.bos_token,
             *self.de_tok.tokenize(row[0]),
-        ][self.config.max_length - 1]
+        ][: self.config.max_length - 1]
         en_tokens = [
             self.config.bos_token,
             *self.en_tok.tokenize(row[1]),
-        ][:self.config.max_length - 1]
-        de_tokens += self.config.eos_token
-        en_tokens += self.config.eos_token
+        ][: self.config.max_length - 1]
+        de_tokens.append(self.config.eos_token)
+        en_tokens.append(self.config.eos_token)
 
         # TODO: fix this in preprocessing
-        de = np.array(
-            [self.w2i_de.get(token, 0) for token in de_tokens]
-        )
-        en = np.array(
-            [self.w2i_en.get(token, 0) for token in en_tokens]
-        )
+        de = np.array([self.w2i_de.get(token, 0) for token in de_tokens])
+        en = np.array([self.w2i_en.get(token, 0) for token in en_tokens])
 
         padded_de = np.pad(de, (0, self.config.max_length - len(de)))
         padded_en = np.pad(en, (0, self.config.max_length - len(en)))

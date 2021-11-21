@@ -76,18 +76,13 @@ class Seq2SeqRNN(pl.LightningModule):
         encoder_hidden = torch.zeros(
             1, batch_size, self.config.hidden_size, device=self.device
         )
-        encoder_outputs = torch.zeros(
-            self.config.max_length, self.config.hidden_size, device=self.device
-        )
+        # TODO: encoder_outputs are needed for attention
 
         # an RNN works by iterating over all words one by one
         for word_index in range(wc):
             encoder_output, encoder_hidden = self.encoder(
                 input_tensor[:, word_index], encoder_hidden
             )
-            encoder_outputs[word_index] = encoder_output[
-                0, 0
-            ]  # TODO: why exactly do we need [0, 0] here?
 
         decoder_input = torch.full(
             (self.config.batch_size, 1), bos_token, device=self.device
@@ -108,7 +103,8 @@ class Seq2SeqRNN(pl.LightningModule):
 
         for word_index in range(target_word_count):
             decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
-            # what does this do?
+            # TODO: what does this do?
+            # looks like this for attention?
             topv, topi = decoder_output.topk(1)
             decoder_input = topi.squeeze().detach()
 
@@ -127,16 +123,19 @@ class Seq2SeqRNN(pl.LightningModule):
         ) = self.move_encoder_forward(batch)
 
         use_teacher_forcing = random() < self.config.teacher_forcing_ratio
+        use_teacher_forcing = True
         loss = 0
 
         if use_teacher_forcing:
             loss_function = nn.NLLLoss()
             for word_index in range(target_word_count):
+                # TODO: is this off by 1?
+                # are we setting input to what we're trying to predict??
+                decoder_input = target_tensor[:, word_index]
                 decoder_output, decoder_hidden = self.decoder(
                     decoder_input, decoder_hidden
                 )
-                decoder_input = target_tensor[word_index]
-                loss += loss_function(decoder_output, target_tensor[word_index])
+                loss += loss_function(decoder_output, target_tensor[:, word_index])
         else:
             loss = self._move_decoder_forward(
                 decoder_input, decoder_hidden, target_tensor, target_word_count

@@ -12,31 +12,31 @@ hparams:
   type: bool                            # the type MUST be bool
   default: false
   help: Should the config be printed?
-- name: hidden_size
+- name: hidden-size
   type: int
   default: 256
   help: Encoder output size (also decoder input size)
-- name: teacher_forcing_ratio
+- name: teacher-forcing-ratio
   type: float
   default: 0.5
   help: How much teacher forcing should be used?
-- name: min_occurances_for_vocab
+- name: min-occurances-for-vocab
   type: int
   default: 5
   help: Minimum number of times a word must occur for it to be in vocab
-- name: max_length
+- name: max-length
   type: int
   default: 100
   help: maximum number of tokens in input/output sentence
-- name: bos_token
+- name: bos-token
   type: str
   default: <BOS>
   help: begin sentence token
-- name: eos_token
+- name: eos-token
   type: str
   default: <EOS>
   help: end sentence token
-- name: checkpoint_path
+- name: checkpoint-path
   type: str
   default:
   help: path to model checkpoint
@@ -44,11 +44,11 @@ hparams:
   type: str
   default: logs/run{}
   help: log file path
-- name: batch_size
+- name: batch-size
   type: int
   default: 16
   help: batch size used for training or validation
-- name: pickle_path
+- name: pickle-path
   type: str
   default: data/w2i.obj
   help: path to the words to index mapping
