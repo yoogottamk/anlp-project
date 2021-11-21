@@ -29,6 +29,26 @@ class EncoderRNN(nn.Module):
         return output, hidden
 
 
+class DecoderRNN(nn.Module):
+    def __init__(self, config: Config, output_size: int):
+        super().__init__()
+        self.config = config
+
+        self.emb_layer_with_activation = nn.Sequential(
+            nn.Embedding(output_size, self.config.hidden_size, padding_idx=0), nn.ReLU()
+        )
+        self.gru = nn.GRU(self.config.hidden_size, self.config.hidden_size)
+        self.output_with_activation = nn.Sequential(
+            nn.Linear(self.config.hidden_size, output_size), nn.LogSoftmax(dim=1)
+        )
+
+    def forward(self, input, hidden):
+        emb = self.emb_layer_with_activation(input).view(1, input.size(0), -1)
+        output, hidden = self.gru(emb, hidden)
+        output = self.output_with_activation(output[0])
+        return output, hidden
+
+
 class AttentionDecoderRNN(nn.Module):
     def __init__(
         self,
@@ -64,9 +84,7 @@ class AttentionDecoderRNN(nn.Module):
         # encoder_outputs = (batch, max length of sentence, hidden size)
         attn_weights = attn_weights.unsqueeze(1)
         # bmm == batch matrix matrix product
-        attn_applied = torch.bmm(
-            attn_weights, encoder_outputs
-        ).view(1, batch_size, -1)
+        attn_applied = torch.bmm(attn_weights, encoder_outputs).view(1, batch_size, -1)
 
         output = torch.cat((emb[0], attn_applied[0]), 1)
         output = self.attn_combine(output).unsqueeze(0)
@@ -108,7 +126,10 @@ class Seq2SeqRNN(pl.LightningModule):
         )
         # (batchsize, sentence max length, attention vector size (hidden size))
         encoder_outputs = torch.zeros(
-            batch_size, self.config.max_length, self.config.hidden_size, device=self.device
+            batch_size,
+            self.config.max_length,
+            self.config.hidden_size,
+            device=self.device,
         )
 
         # an RNN works by iterating over all words one by one
@@ -205,11 +226,15 @@ class Seq2SeqRNN(pl.LightningModule):
             decoder_hidden,
             target_tensor,
             target_word_count,
-            encoder_outputs
+            encoder_outputs,
         ) = self._move_encoder_forward(batch)
 
         loss = self._move_decoder_forward(
-            decoder_input, decoder_hidden, target_tensor, target_word_count, encoder_outputs
+            decoder_input,
+            decoder_hidden,
+            target_tensor,
+            target_word_count,
+            encoder_outputs,
         )
 
         val_loss = loss.item() / target_word_count

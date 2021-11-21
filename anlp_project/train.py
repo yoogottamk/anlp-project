@@ -51,6 +51,10 @@ def train_model(config: Config):
     # -1 implies use all GPUs available
     gpu_count = -1 if torch.cuda.is_available() else 0
     trainer = Trainer(
-        logger=wandb_logger, max_epochs=config.n_epochs, min_epochs=1, gpus=gpu_count, strategy="ddp"
+        logger=wandb_logger,
+        max_epochs=config.n_epochs,
+        min_epochs=1,
+        gpus=gpu_count,
+        strategy="ddp",
     )
     trainer.fit(model, train_dataloader, val_dataloader)
