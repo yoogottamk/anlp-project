@@ -11,7 +11,7 @@ mkdir -p "${DS_DIR}/intermediate"
 
 while [[ $( md5sum "$DS_LOC" | awk '{ print $1 }' ) != "$DS_HASH" ]]; do
     echo "Checksum mismatch or file not present. Downloading..."
-    wget -O "$DS_LOC" "$DS_URL"
+    wget --no-check-certificate -O "$DS_LOC" "$DS_URL"
     echo "Dataset downloaded. Checking hash..."
 done
 

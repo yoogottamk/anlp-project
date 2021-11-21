@@ -16,6 +16,10 @@ hparams:
   type: int
   default: 256
   help: Encoder output size (also decoder input size)
+- name: dataset-fraction
+  type: float
+  default: 1.0
+  help: Only the top fraction of the dataset will be used
 - name: teacher-forcing-ratio
   type: float
   default: 0.5

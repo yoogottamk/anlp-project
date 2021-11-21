@@ -39,21 +39,23 @@ def _word_freq_calculator(db_path, start, end):
 class EuroParlRaw(Dataset):
     def __init__(self, db_path=DATA_ROOT / "dataset.sqlite"):
         super().__init__()
-        self._conn = sqlite3.connect(db_path)
-        self.__len = int(
-            self._conn.cursor().execute("select count(*) from dataset").fetchone()[0]
+        self.db_path = db_path
+        conn = sqlite3.connect(self.db_path, check_same_thread=False)
+        self._len = int(
+            conn.cursor().execute("select count(*) from dataset").fetchone()[0]
         )
 
     def __getitem__(self, idx):
+        conn = sqlite3.connect(self.db_path, check_same_thread=False)
         row = (
-            self._conn.cursor()
+            conn.cursor()
             .execute("select * from dataset where rowid = (?)", (idx + 1,))
             .fetchone()
         )
         return row
 
     def __len__(self) -> int:
-        return self.__len
+        return self._len
 
 
 class EuroParl(EuroParlRaw):
@@ -66,6 +68,8 @@ class EuroParl(EuroParlRaw):
         super().__init__(db_path=db_path)
 
         self.config = config
+        self._len = int(self._len * self.config.dataset_fraction)
+
         self.de_tok = MosesTokenizer(lang="de")
         self.en_tok = MosesTokenizer()
 
@@ -139,6 +143,7 @@ class EuroParl(EuroParlRaw):
 
     def __getitem__(self, idx: int) -> Tuple[np.ndarray, np.ndarray]:
         row = super().__getitem__(idx)
+        assert row, len(self)
 
         de_tokens = [
             self.config.bos_token,
