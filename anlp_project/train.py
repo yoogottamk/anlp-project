@@ -1,6 +1,7 @@
 import logging
 import multiprocessing
 import os
+from pathlib import Path
 
 import torch
 from pytorch_lightning import Trainer
@@ -53,8 +54,8 @@ def train_model(config: Config):
     trainer = Trainer(
         logger=wandb_logger,
         max_epochs=config.n_epochs,
-        min_epochs=1,
         gpus=gpu_count,
         strategy="ddp",
+        default_root_dir=str(Path(os.getcwd()) / "checkpoints")
     )
     trainer.fit(model, train_dataloader, val_dataloader)
