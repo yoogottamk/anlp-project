@@ -25,7 +25,7 @@ def anlp_project(**kwargs):
     if kwargs["subcmd"] == "train":
         train_model(config)
     if kwargs["subcmd"] == "inference":
-        inference_model(config)
+        inference_model(config, kwargs["checkpoint"], kwargs["sentence"])
 
 
 if __name__ == "__main__":

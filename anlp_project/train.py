@@ -58,6 +58,6 @@ def train_model(config: Config):
         max_epochs=config.n_epochs,
         gpus=gpu_count,
         strategy="ddp",
-        default_root_dir=checkpoint_path
+        default_root_dir=checkpoint_path,
     )
     trainer.fit(model, train_dataloader, val_dataloader)

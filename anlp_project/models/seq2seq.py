@@ -1,3 +1,4 @@
+import logging
 from random import random
 from typing import Tuple, List
 
@@ -247,7 +248,11 @@ class Seq2SeqRNN(pl.LightningModule):
         return val_loss
 
     def evaluate(self, input_sentence: List[int]):
-        batch = (None, None)
+        # one batch of the input sentence
+        input_tensor = torch.LongTensor([input_sentence])
+        # just passing input_tensor in target tensor too
+        # as it doesn't matter anyway (we're not computing loss)
+        batch = (input_tensor, input_tensor)
         # assert batch size is 1
         (
             decoder_input,
@@ -262,11 +267,12 @@ class Seq2SeqRNN(pl.LightningModule):
 
         for word_index in range(self.config.max_length):
             decoder_output, decoder_hidden, decoder_attention = self.decoder(
-                decoder_input, decoder_hidden, encoder_outputs)
+                decoder_input, decoder_hidden, encoder_outputs
+            )
             decoder_attentions[word_index] = decoder_attention.data
             topv, topi = decoder_output.data.topk(1)
             if topi.item() == self.config.eos_token:
-                decoded_words.append('<EOS>')
+                decoded_words.append("<EOS>")
                 break
             else:
                 decoded_words.append(topi.item())

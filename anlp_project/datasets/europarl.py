@@ -1,10 +1,11 @@
+import copy
 import logging
 import multiprocessing
 import pickle
 import sqlite3
 from collections import Counter
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
 from sacremoses.tokenize import MosesTokenizer
@@ -59,6 +60,10 @@ class EuroParlRaw(Dataset):
 
 
 class EuroParl(EuroParlRaw):
+    UNK_TOKEN_INDEX = 0
+    BOS_TOKEN_INDEX = 1
+    EOS_TOKEN_INDEX = 2
+
     def __init__(
         self,
         config: Config = Config.from_file(),
@@ -121,8 +126,12 @@ class EuroParl(EuroParlRaw):
             wf_de += local_wf_de
             wf_en += local_wf_en
 
-        w2i_de = {"__UNKNOWN__": 0, self.config.bos_token: 1, self.config.eos_token: 2}
-        w2i_en = {"__UNKNOWN__": 0, self.config.bos_token: 1, self.config.eos_token: 2}
+        w2i_de = {
+            "__UNKNOWN__": self.UNK_TOKEN_INDEX,
+            self.config.bos_token: self.BOS_TOKEN_INDEX,
+            self.config.eos_token: self.EOS_TOKEN_INDEX,
+        }
+        w2i_en = copy.copy(w2i_de)
 
         i = len(w2i_de)
         for w, f in tqdm(wf_de.items(), desc="Mapping German words to indices"):
@@ -164,3 +173,18 @@ class EuroParl(EuroParlRaw):
         padded_en = np.pad(en, (0, self.config.max_length - len(en)))
 
         return padded_de, padded_en
+
+    def sentence_to_indices(self, sentence: str):
+        tokens = self.de_tok.tokenize(sentence)
+        indices = [self.w2i_de.get(token, 0) for token in tokens]
+        return indices
+
+    def indices_to_sentence(self, indices: List[int]):
+        tokens = []
+        # TODO: pickle the reverse lookup object also
+        for idx in indices:
+            for k, v in self.w2i_en.items():
+                if v == idx:
+                    tokens.append(k)
+
+        return " ".join(tokens)
