@@ -8,7 +8,8 @@ from anlp_project.models.seq2seq import Seq2SeqRNN
 def inference_model(config: Config, checkpoint_file: str, input_sentence: str):
     if not input_sentence:
         # parliament related sample sentence
-        input_sentence = "Our citizens need better water supply to their house"
+        # it is German for: "Our citizens need better water supply to their house"
+        input_sentence = "Unsere Bürger brauchen eine bessere Wasserversorgung ihres Hauses"
 
     dataset = EuroParl(config=config)
 

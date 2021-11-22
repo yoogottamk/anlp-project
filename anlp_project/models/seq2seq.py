@@ -253,7 +253,6 @@ class Seq2SeqRNN(pl.LightningModule):
         # just passing input_tensor in target tensor too
         # as it doesn't matter anyway (we're not computing loss)
         batch = (input_tensor, input_tensor)
-        # assert batch size is 1
         (
             decoder_input,
             decoder_hidden,
@@ -277,6 +276,6 @@ class Seq2SeqRNN(pl.LightningModule):
             else:
                 decoded_words.append(topi.item())
 
-            decoder_input = topi.squeeze().detach()
+            decoder_input = topi.squeeze().detach().view(1, 1)
 
         return decoded_words
