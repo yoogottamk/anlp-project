@@ -11,6 +11,7 @@ from anlp_project.models.original_transformer import (
     CopyParams,
     LayerNorm,
     FairseqIncrementalDecoder,
+    Linear
 )
 from anlp_project.models.pos_embeddings import (
     PositionalEmbedding,
@@ -18,13 +19,6 @@ from anlp_project.models.pos_embeddings import (
 )
 from anlp_project.models import utils
 
-
-def Linear(in_features, out_features, bias=True):
-    m = nn.Linear(in_features, out_features, bias)
-    nn.init.xavier_uniform_(m.weight)
-    if bias:
-        nn.init.constant_(m.bias, 0.0)
-    return m
 
 
 class TransformerEncoder(FairseqEncoder):
