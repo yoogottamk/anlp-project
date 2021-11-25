@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+from anlp_project.models.multihead_attention import MultiheadAttention
 
 class FairseqEncoder(nn.Module):
     """Base class for encoders."""
