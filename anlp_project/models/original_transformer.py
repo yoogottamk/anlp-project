@@ -3,6 +3,7 @@ from torch import nn
 
 from anlp_project.models import utils
 
+
 def CopyParams(base_layer, target_layer, decoder=False):
     if target_layer.self_attn.qkv_same_dim:
         target_layer.self_attn.in_proj_weight = base_layer.self_attn.in_proj_weight

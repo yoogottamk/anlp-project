@@ -6,10 +6,15 @@ from torch.nn import functional as F
 
 from fairseq.tasks.translation import TranslationTask
 
-from fairseq.models.transformer import FairseqEncoder, TransformerDecoderLayer, TransformerEncoderLayer, LayerNorm, FairseqIncrementalDecoder, Linear
+from fairseq.models.transformer import (
+    FairseqEncoder,
+    LayerNorm,
+    FairseqIncrementalDecoder,
+    Linear,
+)
 from fairseq.modules import PositionalEmbedding, SinusoidalPositionalEmbedding
-from fairseq.modules import MultiheadAttention
 
+from anlp_project.models.layers import TransformerEncoderLayer, TransformerDecoderLayer
 from anlp_project.models.original_transformer import (
     CopyParams,
 )
