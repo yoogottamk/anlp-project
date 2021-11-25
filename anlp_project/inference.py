@@ -9,7 +9,9 @@ def inference_model(config: Config, checkpoint_file: str, input_sentence: str):
     if not input_sentence:
         # parliament related sample sentence
         # it is German for: "Our citizens need better water supply to their house"
-        input_sentence = "Unsere Bürger brauchen eine bessere Wasserversorgung ihres Hauses"
+        input_sentence = (
+            "Unsere Bürger brauchen eine bessere Wasserversorgung ihres Hauses"
+        )
 
     dataset = EuroParl(config=config)
 
