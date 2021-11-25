@@ -1,6 +1,11 @@
-torch
+torch~=1.7.1
 pytorch-lightning
-rich
-click
-sacremoses
+rich~=10.14.0
+click~=8.0.3
+sacremoses~=0.0.46
 black
+tqdm~=4.62.3
+setuptools~=58.1.0
+fairseq~=0.10.2
+numpy~=1.21.4
+PyYAML~=6.0
