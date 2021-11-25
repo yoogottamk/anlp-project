@@ -13,7 +13,7 @@ def cli_decorator(f):
         _f = click.command("anlp_project")(f)
         _f = click.argument("subcmd")(_f)
         _f = click.option(
-            "--checkpoint", required=True, help="Path to model checkpoint to evaluate"
+            "--checkpoint", required=False, help="Path to model checkpoint to evaluate", default=""
         )(_f)
         _f = click.option(
             "--sentence",
