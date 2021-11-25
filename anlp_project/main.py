@@ -25,8 +25,8 @@ def anlp_project(**kwargs):
     if kwargs["subcmd"] == "train":
         train_model(config)
     if kwargs["subcmd"] == "inference":
-        if 'checkpoint' not in kwargs:
-            raise TypeError('Checkpoint path must be non-empty')
+        if "checkpoint" not in kwargs:
+            raise TypeError("Checkpoint path must be non-empty")
         inference_model(config, kwargs["checkpoint"], kwargs["sentence"])
 
 

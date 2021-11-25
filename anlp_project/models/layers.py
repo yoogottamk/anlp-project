@@ -91,11 +91,11 @@ class TransformerEncoderLayer(nn.Module):
             self.fc2 = Linear(args.encoder_ffn_embed_dim, self.embed_dim)
             if args.init_type == "looklinear":
                 self.fc1.weight.data[
-                int(args.encoder_ffn_embed_dim / 2):, :
-                ] = -self.fc1.weight.data[0: int(args.encoder_ffn_embed_dim / 2), :]
+                    int(args.encoder_ffn_embed_dim / 2) :, :
+                ] = -self.fc1.weight.data[0 : int(args.encoder_ffn_embed_dim / 2), :]
                 self.fc2.weight.data[
-                :, int(args.encoder_ffn_embed_dim / 2):
-                ] = -self.fc2.weight.data[:, 0: int(args.encoder_ffn_embed_dim / 2)]
+                    :, int(args.encoder_ffn_embed_dim / 2) :
+                ] = -self.fc2.weight.data[:, 0 : int(args.encoder_ffn_embed_dim / 2)]
 
             if args.init_type != "rezero":
                 self.self_attn_layer_norm = LayerNorm(self.embed_dim)
@@ -141,9 +141,9 @@ class TransformerEncoderLayer(nn.Module):
     def forward(self, x, encoder_padding_mask, attn_mask=None):
 
         not_initialized = (
-                ("adaptive-profiling" == self.args.init_type)
-                and (1.0 == self.attention_ratio_change.min())
-                and self.training
+            ("adaptive-profiling" == self.args.init_type)
+            and (1.0 == self.attention_ratio_change.min())
+            and self.training
         )
 
         residual = x
@@ -180,12 +180,12 @@ class TransformerEncoderLayer(nn.Module):
                 print("encoder attn ratio: {}".format(tmp_ratio))
                 input_std = np.var(
                     (residual * self.attention_ratio_change)
-                        .clone()
-                        .cpu()
-                        .float()
-                        .data.contiguous()
-                        .view(-1)
-                        .numpy()
+                    .clone()
+                    .cpu()
+                    .float()
+                    .data.contiguous()
+                    .view(-1)
+                    .numpy()
                 )
                 output_std = np.var(
                     x.clone().cpu().float().data.contiguous().view(-1).numpy()
@@ -209,17 +209,17 @@ class TransformerEncoderLayer(nn.Module):
                 if "adaptive" in self.args.init_type:
                     for ind in range(len(residual_components) - 1):
                         residual_components[ind] = (
-                                residual_components[ind]
-                                * self.self_attn_layer_norm.weight
-                                * self.attention_ratio_change.data
+                            residual_components[ind]
+                            * self.self_attn_layer_norm.weight
+                            * self.attention_ratio_change.data
                         )
                     residual_components[-1] = (
-                            residual_components[-1] * self.self_attn_layer_norm.weight
+                        residual_components[-1] * self.self_attn_layer_norm.weight
                     )
                 else:
                     for ind in range(len(residual_components)):
                         residual_components[ind] = (
-                                residual_components[ind] * self.self_attn_layer_norm.weight
+                            residual_components[ind] * self.self_attn_layer_norm.weight
                         )
 
             else:
@@ -269,12 +269,12 @@ class TransformerEncoderLayer(nn.Module):
                 print("encoder ffn ratio: {}".format(tmp_ratio))
                 input_std = np.var(
                     (residual * self.fc_ratio_change)
-                        .clone()
-                        .cpu()
-                        .float()
-                        .data.contiguous()
-                        .view(-1)
-                        .numpy()
+                    .clone()
+                    .cpu()
+                    .float()
+                    .data.contiguous()
+                    .view(-1)
+                    .numpy()
                 )
                 output_std = np.var(
                     x.clone().cpu().float().data.contiguous().view(-1).numpy()
@@ -295,17 +295,17 @@ class TransformerEncoderLayer(nn.Module):
                 if "adaptive" in self.args.init_type:
                     for ind in range(len(residual_components) - 1):
                         residual_components[ind] = (
-                                residual_components[ind]
-                                * self.final_layer_norm.weight
-                                * self.fc_ratio_change.data
+                            residual_components[ind]
+                            * self.final_layer_norm.weight
+                            * self.fc_ratio_change.data
                         )
                     residual_components[-1] = (
-                            residual_components[-1] * self.final_layer_norm.weight
+                        residual_components[-1] * self.final_layer_norm.weight
                     )
                 else:
                     for ind in range(len(residual_components) - 1):
                         residual_components[ind] = (
-                                residual_components[ind] * self.final_layer_norm.weight
+                            residual_components[ind] * self.final_layer_norm.weight
                         )
 
             else:
@@ -373,12 +373,12 @@ class TransformerDecoderLayer(nn.Module):
     """
 
     def __init__(
-            self,
-            args,
-            no_encoder_attn=False,
-            add_bias_kv=False,
-            add_zero_attn=False,
-            LayerNum=None,
+        self,
+        args,
+        no_encoder_attn=False,
+        add_bias_kv=False,
+        add_zero_attn=False,
+        LayerNum=None,
     ):
         super().__init__()
 
@@ -493,11 +493,11 @@ class TransformerDecoderLayer(nn.Module):
             self.fc2 = Linear(args.decoder_ffn_embed_dim, self.embed_dim)
             if args.init_type == "looklinear":
                 self.fc1.weight.data[
-                int(args.decoder_ffn_embed_dim / 2):, :
-                ] = -self.fc1.weight.data[0: int(args.decoder_ffn_embed_dim / 2), :]
+                    int(args.decoder_ffn_embed_dim / 2) :, :
+                ] = -self.fc1.weight.data[0 : int(args.decoder_ffn_embed_dim / 2), :]
                 self.fc2.weight.data[
-                :, int(args.decoder_ffn_embed_dim / 2):
-                ] = -self.fc2.weight.data[:, 0: int(args.decoder_ffn_embed_dim / 2)]
+                    :, int(args.decoder_ffn_embed_dim / 2) :
+                ] = -self.fc2.weight.data[:, 0 : int(args.decoder_ffn_embed_dim / 2)]
 
             export = getattr(args, "char_inputs", False)
 
@@ -543,22 +543,22 @@ class TransformerDecoderLayer(nn.Module):
         self.onnx_trace = True
 
     def forward(
-            self,
-            x,
-            encoder_out=None,
-            encoder_padding_mask=None,
-            incremental_state=None,
-            prev_self_attn_state=None,
-            prev_attn_state=None,
-            self_attn_mask=None,
-            self_attn_padding_mask=None,
-            need_attn=False,
-            need_head_weights=False,
+        self,
+        x,
+        encoder_out=None,
+        encoder_padding_mask=None,
+        incremental_state=None,
+        prev_self_attn_state=None,
+        prev_attn_state=None,
+        self_attn_mask=None,
+        self_attn_padding_mask=None,
+        need_attn=False,
+        need_head_weights=False,
     ):
         not_initialized = (
-                ("adaptive-profiling" == self.args.init_type)
-                and (1.0 == self.self_ratio_change.min())
-                and self.training
+            ("adaptive-profiling" == self.args.init_type)
+            and (1.0 == self.self_ratio_change.min())
+            and self.training
         )
 
         if need_head_weights:
@@ -578,8 +578,8 @@ class TransformerDecoderLayer(nn.Module):
                 saved_state["prev_key_padding_mask"] = prev_self_attn_state[2]
             self.self_attn._set_input_buffer(incremental_state, saved_state)
         if self.cross_self_attention and not (
-                incremental_state is not None
-                and "prev_key" in self.self_attn._get_input_buffer(incremental_state)
+            incremental_state is not None
+            and "prev_key" in self.self_attn._get_input_buffer(incremental_state)
         ):
             if self_attn_mask is not None:
                 self_attn_mask = torch.cat(
@@ -620,12 +620,12 @@ class TransformerDecoderLayer(nn.Module):
                 print("decoder self attn ratio: {}".format(tmp_ratio))
                 input_std = np.var(
                     (residual * self.self_ratio_change)
-                        .clone()
-                        .cpu()
-                        .float()
-                        .data.contiguous()
-                        .view(-1)
-                        .numpy()
+                    .clone()
+                    .cpu()
+                    .float()
+                    .data.contiguous()
+                    .view(-1)
+                    .numpy()
                 )
                 output_std = np.var(
                     x.clone().cpu().float().data.contiguous().view(-1).numpy()
@@ -681,12 +681,12 @@ class TransformerDecoderLayer(nn.Module):
                     print("decoder encoder attn ratio: {}".format(tmp_ratio))
                     input_std = np.var(
                         (residual * self.encoder_ratio_change)
-                            .clone()
-                            .cpu()
-                            .float()
-                            .data.contiguous()
-                            .view(-1)
-                            .numpy()
+                        .clone()
+                        .cpu()
+                        .float()
+                        .data.contiguous()
+                        .view(-1)
+                        .numpy()
                     )
                     output_std = np.var(
                         x.clone().cpu().float().data.contiguous().view(-1).numpy()
@@ -729,12 +729,12 @@ class TransformerDecoderLayer(nn.Module):
                 print("decoder ffn ratio: {}".format(tmp_ratio))
                 input_var = np.var(
                     (residual * self.fc_ratio_change)
-                        .clone()
-                        .cpu()
-                        .float()
-                        .data.contiguous()
-                        .view(-1)
-                        .numpy()
+                    .clone()
+                    .cpu()
+                    .float()
+                    .data.contiguous()
+                    .view(-1)
+                    .numpy()
                 )
                 output_var = np.var(
                     x.clone().cpu().float().data.contiguous().view(-1).numpy()
