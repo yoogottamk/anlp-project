@@ -11,14 +11,13 @@ from anlp_project.models.original_transformer import (
     CopyParams,
     LayerNorm,
     FairseqIncrementalDecoder,
-    Linear
+    Linear,
 )
 from anlp_project.models.pos_embeddings import (
     PositionalEmbedding,
     SinusoidalPositionalEmbedding,
 )
 from anlp_project.models import utils
-
 
 
 class TransformerEncoder(FairseqEncoder):

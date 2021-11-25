@@ -7,12 +7,14 @@ from torch.nn import functional as F
 from anlp_project.models import utils
 from anlp_project.models.multihead_attention import MultiheadAttention
 
+
 def Linear(in_features, out_features, bias=True):
     m = nn.Linear(in_features, out_features, bias)
     nn.init.xavier_uniform_(m.weight)
     if bias:
         nn.init.constant_(m.bias, 0.0)
     return m
+
 
 class FairseqEncoder(nn.Module):
     """Base class for encoders."""
@@ -877,6 +879,7 @@ def LayerNorm(normalized_shape, eps=1e-5, elementwise_affine=True, export=False)
             pass
     return torch.nn.LayerNorm(normalized_shape, eps, elementwise_affine)
 
+
 class FairseqDecoder(nn.Module):
     """Base class for decoders."""
 
@@ -898,7 +901,9 @@ class FairseqDecoder(nn.Module):
                 - the decoder's output of shape `(batch, tgt_len, vocab)`
                 - a dictionary with any model-specific outputs
         """
-        x, extra = self.extract_features(prev_output_tokens, encoder_out=encoder_out, **kwargs)
+        x, extra = self.extract_features(
+            prev_output_tokens, encoder_out=encoder_out, **kwargs
+        )
         x = self.output_layer(x)
         return x, extra
 
@@ -923,10 +928,10 @@ class FairseqDecoder(nn.Module):
     def get_normalized_probs(self, net_output, log_probs, sample):
         """Get normalized probabilities (or log probs) from a net's output."""
 
-        if hasattr(self, 'adaptive_softmax') and self.adaptive_softmax is not None:
+        if hasattr(self, "adaptive_softmax") and self.adaptive_softmax is not None:
             if sample is not None:
-                assert 'target' in sample
-                target = sample['target']
+                assert "target" in sample
+                target = sample["target"]
             else:
                 target = None
             out = self.adaptive_softmax.get_log_prob(net_output[0], target=target)
