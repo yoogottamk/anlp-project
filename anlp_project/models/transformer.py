@@ -4,8 +4,6 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from fairseq.tasks.translation import TranslationTask
-
 from fairseq.models.transformer import (
     FairseqEncoder,
     LayerNorm,

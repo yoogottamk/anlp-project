@@ -5,16 +5,20 @@ import os
 from pathlib import Path
 
 import torch
+from torch.nn import Embedding
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 from torch.utils.data import DataLoader, random_split
 
-from fairseq.models.transformer import TransformerModel
+from fairseq.models.transformer import (
+    TransformerModel,
+)
 from fairseq.tasks.translation import TranslationTask
 
 from anlp_project.config import Config
 from anlp_project.datasets.europarl import EuroParl
 from anlp_project.utils import get_checkpoint_dir
+from anlp_project.models import utils
 
 
 def get_args():
@@ -151,7 +155,7 @@ def get_args():
     )
 
 
-def get_transformer_model(args=None):
+def get_model_args(args=None):
     if not args:
         args = {}
     args.encoder_embed_path = getattr(args, "encoder_embed_path", None)
@@ -193,15 +197,59 @@ def get_transformer_model(args=None):
     )
     args.decoder_input_dim = getattr(args, "decoder_input_dim", args.decoder_embed_dim)
 
-    model = TransformerModel(args, encoder, decoder)
-    return model
+    return args
+
+
+DEFAULT_MAX_SOURCE_POSITIONS = 1024
+DEFAULT_MAX_TARGET_POSITIONS = 1024
 
 
 def train_model(config: Config):
     dataset = EuroParl(config=config)
     args = get_args()
     task = TranslationTask(args, dataset.de_dictionary, dataset.en_dictionary)
-    model = get_transformer_model(args)
+
+    if not hasattr(args, "max_source_positions"):
+        args.max_source_positions = DEFAULT_MAX_SOURCE_POSITIONS
+    if not hasattr(args, "max_target_positions"):
+        args.max_target_positions = DEFAULT_MAX_TARGET_POSITIONS
+    # TODO: find good drop values; these I got from github
+    # https://github.com/pytorch/fairseq/issues/1696
+    if not (hasattr(args, "encoder_layerdrop")):
+        args.encoder_layerdrop = 0.1
+    if not (hasattr(args, "decoder_layerdrop")):
+        args.decoder_layerdrop = 0.1
+    # below two attributes I have set without thought
+    if not (hasattr(args, "no_scale_embedding")):
+        args.no_scale_embedding = True
+    if not (hasattr(args, "quant_noise_pq")):
+        args.quant_noise_pq = 0
+
+    print("source len: {}".format(args.max_source_positions))
+    print("target len: {}".format(args.max_target_positions))
+
+    src_dict, tgt_dict = task.source_dictionary, task.target_dictionary
+
+    def build_embedding(dictionary, embed_dim, path=None):
+        num_embeddings = len(dictionary)
+        padding_idx = dictionary.pad()
+        emb = Embedding(num_embeddings, embed_dim, padding_idx)
+        # if provided, load from preloaded dictionaries
+        if path:
+            embed_dict = utils.parse_embedding(path)
+            utils.load_embedding(embed_dict, dictionary, emb)
+        return emb
+
+    encoder_embed_tokens = build_embedding(
+        src_dict, args.encoder_embed_dim, args.encoder_embed_path
+    )
+    decoder_embed_tokens = build_embedding(
+        tgt_dict, args.decoder_embed_dim, args.decoder_embed_path
+    )
+
+    encoder = TransformerModel.build_encoder(args, src_dict, encoder_embed_tokens)
+    decoder = TransformerModel.build_decoder(args, tgt_dict, decoder_embed_tokens)
+    model = TransformerModel(args, encoder, decoder)
 
     # input is English, output is German
     input_size = dataset.de_vocab_size
