@@ -12,6 +12,15 @@ def cli_decorator(f):
     def __cli_decorator(*args, **kwargs):
         _f = click.command("anlp_project")(f)
         _f = click.argument("subcmd")(_f)
+        _f = click.option(
+            "--checkpoint", required=True, help="Path to model checkpoint to evaluate"
+        )(_f)
+        _f = click.option(
+            "--sentence",
+            required=False,
+            help="Sentence to evaluate model on",
+            default="",
+        )(_f)
 
         hparams = yaml.safe_load(
             (Path(__file__).parent / Path("hparams.yaml")).read_text()
