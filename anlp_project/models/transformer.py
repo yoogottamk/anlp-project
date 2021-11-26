@@ -9,6 +9,7 @@ from fairseq.models.transformer import (
     LayerNorm,
     FairseqIncrementalDecoder,
     Linear,
+    TransformerModel
 )
 from fairseq.modules import PositionalEmbedding, SinusoidalPositionalEmbedding
 
@@ -19,7 +20,7 @@ from anlp_project.models.original_transformer import (
 from anlp_project.models import utils
 
 
-class TransformerEncoder(FairseqEncoder):
+class OurTransformerEncoder(FairseqEncoder):
     """
     Transformer encoder consisting of *args.encoder_layers* layers. Each layer
     is a :class:`TransformerEncoderLayer`.
@@ -275,7 +276,7 @@ class TransformerEncoder(FairseqEncoder):
         return state_dict
 
 
-class TransformerDecoder(FairseqIncrementalDecoder):
+class OurTransformerDecoder(FairseqIncrementalDecoder):
     """
     Transformer decoder consisting of *args.decoder_layers* layers. Each layer
     is a :class:`TransformerDecoderLayer`.
@@ -338,6 +339,7 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         # if 'adaptive' in args.init_type and not args.decoder_normalize_before:
         #     print('adaptive init')
 
+        assert self.share_params_cross_layer
         if self.share_params_cross_layer:
             if self.share_type == "sequence":
                 shared_num = 0
@@ -661,3 +663,18 @@ class TransformerDecoder(FairseqIncrementalDecoder):
             state_dict[version_key] = torch.Tensor([1])
 
         return state_dict
+
+
+class OurTransformerModel(TransformerModel):
+    @classmethod
+    def build_encoder(cls, args, src_dict, embed_tokens):
+        return OurTransformerEncoder(args, src_dict, embed_tokens)
+
+    @classmethod
+    def build_decoder(cls, args, tgt_dict, embed_tokens):
+        return OurTransformerDecoder(
+            args,
+            tgt_dict,
+            embed_tokens,
+            no_encoder_attn=getattr(args, "no_cross_attention", False),
+        )

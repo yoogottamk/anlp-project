@@ -4,12 +4,13 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from fairseq.modules import MultiheadAttention
 from fairseq.modules.transformer_layer import Linear
 from fairseq.modules.layer_norm import LayerNorm
 
 from anlp_project.models import utils
+from anlp_project.models.multihead_attention import MultiheadAttention
 
+tmp_file = None
 
 class TransformerEncoderLayer(nn.Module):
     def __init__(self, args, LayerNum=None):

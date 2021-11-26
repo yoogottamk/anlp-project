@@ -2,7 +2,6 @@ from argparse import Namespace
 import logging
 import multiprocessing
 import os
-from pathlib import Path
 
 import torch
 from torch.nn import Embedding
@@ -10,8 +9,8 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 from torch.utils.data import DataLoader, random_split
 
-from fairseq.models.transformer import (
-    TransformerModel,
+from anlp_project.models.transformer import (
+    OurTransformerModel
 )
 from fairseq.tasks.translation import TranslationTask
 
@@ -247,9 +246,9 @@ def train_model(config: Config):
         tgt_dict, args.decoder_embed_dim, args.decoder_embed_path
     )
 
-    encoder = TransformerModel.build_encoder(args, src_dict, encoder_embed_tokens)
-    decoder = TransformerModel.build_decoder(args, tgt_dict, decoder_embed_tokens)
-    model = TransformerModel(args, encoder, decoder)
+    encoder = OurTransformerModel.build_encoder(args, src_dict, encoder_embed_tokens)
+    decoder = OurTransformerModel.build_decoder(args, tgt_dict, decoder_embed_tokens)
+    model = OurTransformerModel(args, encoder, decoder)
 
     # input is English, output is German
     input_size = dataset.de_vocab_size
