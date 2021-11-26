@@ -16,6 +16,7 @@ class Config:
     hidden_size: int
     teacher_forcing_ratio: float
     min_occurances_for_vocab: int
+    dataset_fraction: float
     max_length: int
     bos_token: str
     eos_token: str

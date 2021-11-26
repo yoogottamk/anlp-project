@@ -7,6 +7,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Tuple, List
 
+from fairseq.data.dictionary import Dictionary
 import numpy as np
 from sacremoses.tokenize import MosesTokenizer
 from torch.utils.data import Dataset
@@ -79,16 +80,31 @@ class EuroParl(EuroParlRaw):
         self.en_tok = MosesTokenizer()
 
         if force_regenerate_mappings or not Path(self.config.pickle_path).is_file():
-            self.w2i_de, self.w2i_en = self.prepare_mappings(db_path)
-        else:
-            with open(self.config.pickle_path, "rb") as pickle_file:
-                self.w2i_de, self.w2i_en = pickle.load(pickle_file)
+            self.prepare_word_freq_file(db_path)
 
-        self.de_vocab_size = len(self.w2i_de)
-        self.en_vocab_size = len(self.w2i_en)
+        de_file_path = self.config.pickle_path + "_de"
+        en_file_path = self.config.pickle_path + "_en"
 
-    # TODO: why is db_path asked for here when it was also taken in the __init__ method?
-    def prepare_mappings(self, db_path: Path):
+        self.de_dictionary = Dictionary()
+        self.en_dictionary = Dictionary()
+
+        with open(de_file_path) as f:
+            self.de_dictionary.add_from_file(f)
+        with open(en_file_path) as f:
+            self.en_dictionary.add_from_file(f)
+
+        self.de_dictionary.finalize(threshold=self.config.min_occurances_for_vocab)
+        self.en_dictionary.finalize(threshold=self.config.min_occurances_for_vocab)
+
+        self.de_vocab_size = len(self.de_dictionary.symbols)
+        self.en_vocab_size = len(self.en_dictionary.symbols)
+        logging.info(
+            "Dictionary size: German %d and English %d",
+            self.de_vocab_size,
+            self.en_vocab_size,
+        )
+
+    def prepare_word_freq_file(self, db_path: Path):
         total_size = len(self)
         n_procs = multiprocessing.cpu_count()
         chunk_size = total_size // n_procs
@@ -126,29 +142,16 @@ class EuroParl(EuroParlRaw):
             wf_de += local_wf_de
             wf_en += local_wf_en
 
-        w2i_de = {
-            "__UNKNOWN__": self.UNK_TOKEN_INDEX,
-            self.config.bos_token: self.BOS_TOKEN_INDEX,
-            self.config.eos_token: self.EOS_TOKEN_INDEX,
-        }
-        w2i_en = copy.copy(w2i_de)
-
-        i = len(w2i_de)
-        for w, f in tqdm(wf_de.items(), desc="Mapping German words to indices"):
-            if f >= self.config.min_occurances_for_vocab:
-                w2i_de[w] = i
-                i += 1
-
-        i = len(w2i_en)
-        for w, f in tqdm(wf_en.items(), desc="Mapping English words to indices"):
-            if f >= self.config.min_occurances_for_vocab:
-                w2i_en[w] = i
-                i += 1
+        de_file_path = self.config.pickle_path + "_de"
+        en_file_path = self.config.pickle_path + "_en"
 
         Path(self.config.pickle_path).parent.mkdir(exist_ok=True, parents=True)
-        with open(self.config.pickle_path, "wb") as write_file:
-            pickle.dump((w2i_de, w2i_en), write_file)
-        return w2i_de, w2i_en
+        with open(de_file_path, "w") as de_file:
+            for word, freq in wf_de.items():
+                de_file.write(f"{word} {freq}\n")
+        with open(en_file_path, "w") as en_file:
+            for word, freq in wf_en.items():
+                en_file.write(f"{word} {freq}\n")
 
     def __getitem__(self, idx: int) -> Tuple[np.ndarray, np.ndarray]:
         row = super().__getitem__(idx)

@@ -9,7 +9,6 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 from torch.utils.data import DataLoader, random_split
 
-from fairseq.data.dictionary import Dictionary
 from fairseq.models.transformer import TransformerModel
 from fairseq.tasks.translation import TranslationTask
 
@@ -197,15 +196,11 @@ def get_transformer_model(args=None):
     model = TransformerModel(args, encoder, decoder)
     return model
 
-# return source and target dictionaries
-def get_dictionaries(dataset: EuroParl):
-    de_dict = Dictionary()
 
 def train_model(config: Config):
     dataset = EuroParl(config=config)
     args = get_args()
-    de_dict, en_dict = get_dictionaries(dataset)
-    task = TranslationTask(args, de_dict, en_dict)
+    task = TranslationTask(args, dataset.de_dictionary, dataset.en_dictionary)
     model = get_transformer_model(args)
 
     # input is English, output is German
@@ -217,8 +212,6 @@ def train_model(config: Config):
         input_size,
         output_size,
     )
-
-    model = Seq2SeqRNN(config, input_size, output_size)
 
     total_entries = len(dataset)
     train_ratio = 0.8
