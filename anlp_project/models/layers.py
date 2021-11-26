@@ -12,6 +12,7 @@ from anlp_project.models.multihead_attention import MultiheadAttention
 
 tmp_file = None
 
+
 class TransformerEncoderLayer(nn.Module):
     def __init__(self, args, LayerNum=None):
         super().__init__()

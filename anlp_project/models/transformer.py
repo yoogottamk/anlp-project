@@ -9,9 +9,10 @@ from fairseq.models.transformer import (
     LayerNorm,
     FairseqIncrementalDecoder,
     Linear,
-    TransformerModel
+    TransformerModel,
 )
 from fairseq.modules import PositionalEmbedding, SinusoidalPositionalEmbedding
+from pytorch_lightning import LightningModule
 
 from anlp_project.models.layers import TransformerEncoderLayer, TransformerDecoderLayer
 from anlp_project.models.original_transformer import (
@@ -665,7 +666,7 @@ class OurTransformerDecoder(FairseqIncrementalDecoder):
         return state_dict
 
 
-class OurTransformerModel(TransformerModel):
+class OurTransformerModel(TransformerModel, LightningModule):
     @classmethod
     def build_encoder(cls, args, src_dict, embed_tokens):
         return OurTransformerEncoder(args, src_dict, embed_tokens)
@@ -678,3 +679,17 @@ class OurTransformerModel(TransformerModel):
             embed_tokens,
             no_encoder_attn=getattr(args, "no_cross_attention", False),
         )
+
+    def training_step(self, batch, _batch_idx):
+        # batch[0] = (16, 100)
+        # batch[1] = (16, 100)
+        # length of batch is 2
+        train_loss = 0
+        self.log("train_loss", train_loss, on_step=True, on_epoch=True)
+        return {"train_loss": train_loss}
+
+    def train_dataloader(self):
+        pass
+
+    def configure_optimizers(self):
+        pass

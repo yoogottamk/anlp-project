@@ -9,9 +9,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 from torch.utils.data import DataLoader, random_split
 
-from anlp_project.models.transformer import (
-    OurTransformerModel
-)
+from anlp_project.models.transformer import OurTransformerModel
 from fairseq.tasks.translation import TranslationTask
 
 from anlp_project.config import Config
@@ -212,13 +210,14 @@ def train_model(config: Config):
         args.max_source_positions = DEFAULT_MAX_SOURCE_POSITIONS
     if not hasattr(args, "max_target_positions"):
         args.max_target_positions = DEFAULT_MAX_TARGET_POSITIONS
-    # TODO: find good drop values; these I got from github
-    # https://github.com/pytorch/fairseq/issues/1696
+
+    # TODO: these four values I copied from the parser
+    # defaults in fairseq.models.transformer (not sure
+    # how good these defaults are)
     if not (hasattr(args, "encoder_layerdrop")):
-        args.encoder_layerdrop = 0.1
+        args.encoder_layerdrop = 0
     if not (hasattr(args, "decoder_layerdrop")):
-        args.decoder_layerdrop = 0.1
-    # below two attributes I have set without thought
+        args.decoder_layerdrop = 0
     if not (hasattr(args, "no_scale_embedding")):
         args.no_scale_embedding = True
     if not (hasattr(args, "quant_noise_pq")):
@@ -279,7 +278,7 @@ def train_model(config: Config):
         test_data, batch_size=config.batch_size, num_workers=cpu_count
     )
 
-    wandb_logger = WandbLogger()
+    wandb_logger = WandbLogger(offline=True)
 
     # -1 implies use all GPUs available
     gpu_count = -1 if torch.cuda.is_available() else 0

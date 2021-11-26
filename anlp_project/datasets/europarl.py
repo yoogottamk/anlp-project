@@ -169,8 +169,8 @@ class EuroParl(EuroParlRaw):
         en_tokens.append(self.config.eos_token)
 
         # TODO: fix this in preprocessing
-        de = np.array([self.w2i_de.get(token, 0) for token in de_tokens])
-        en = np.array([self.w2i_en.get(token, 0) for token in en_tokens])
+        de = np.array([self.de_dictionary.index(token) for token in de_tokens])
+        en = np.array([self.de_dictionary.index(token) for token in en_tokens])
 
         padded_de = np.pad(de, (0, self.config.max_length - len(de)))
         padded_en = np.pad(en, (0, self.config.max_length - len(en)))
@@ -179,15 +179,16 @@ class EuroParl(EuroParlRaw):
 
     def sentence_to_indices(self, sentence: str):
         tokens = self.de_tok.tokenize(sentence)
-        indices = [self.w2i_de.get(token, 0) for token in tokens]
+        indices = [self.de_dictionary.index(token) for token in tokens]
         return indices
 
     def indices_to_sentence(self, indices: List[int]):
-        tokens = []
-        # TODO: pickle the reverse lookup object also
-        for idx in indices:
-            for k, v in self.w2i_en.items():
-                if v == idx:
-                    tokens.append(k)
-
-        return " ".join(tokens)
+        return self.en_dictionary.string(indices)
+        # tokens = []
+        # # TODO: pickle the reverse lookup object also
+        # for idx in indices:
+        #     for k, v in self.w2i_en.items():
+        #         if v == idx:
+        #             tokens.append(k)
+        #
+        # return " ".join(tokens)
