@@ -60,3 +60,6 @@ hparams:
   type: float
   default: 0.1
   help: percent of nodes to dropout in decoder
+- name: log-wandb
+  type: bool
+  default: false

@@ -1,7 +1,6 @@
 import logging
 import multiprocessing
 import os
-from pathlib import Path
 
 import torch
 from pytorch_lightning import Trainer
@@ -32,6 +31,9 @@ def train_model(config: Config):
     total_entries = len(dataset)
     train_ratio = 0.8
     train_length = int(total_entries * train_ratio)
+    # bad hack to make this work
+    # always remain a multiple of 4
+    train_length -= train_length % 4
     test_length = total_entries - train_length
 
     cpu_count = int(os.getenv("SLURM_CPUS_ON_NODE", str(multiprocessing.cpu_count())))
@@ -54,10 +56,10 @@ def train_model(config: Config):
     gpu_count = -1 if torch.cuda.is_available() else 0
     checkpoint_path = get_checkpoint_dir(config)
     trainer = Trainer(
-        logger=wandb_logger,
+        logger=wandb_logger if config.log_wandb else [],
         max_epochs=config.n_epochs,
         gpus=gpu_count,
         strategy="ddp",
-        default_root_dir=checkpoint_path
+        default_root_dir=checkpoint_path,
     )
     trainer.fit(model, train_dataloader, val_dataloader)

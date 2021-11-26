@@ -79,11 +79,18 @@ class AttentionDecoderRNN(nn.Module):
         emb = self.embedding(input).view(1, batch_size, -1)
         emb = self.dropout(emb)
 
+        #                                  shape is (batch, 2 * hidden_size)
+        #                                  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        #                        shape is  (batch, sentence max length)
+        #                        vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         attn_weights = F.softmax(self.attn(torch.cat((emb[0], hidden[0]), 1)), dim=1)
-        # shapes checked from official colab notebook
-        # attn weights = (batch, 1, max length of sentence)
+        #              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        #              shape is (batch, max length of sentence)
+
         # encoder_outputs = (batch, max length of sentence, hidden size)
+        # attn_weights: (batch, 1, max length of sentence)
         attn_weights = attn_weights.unsqueeze(1)
+
         # bmm == batch matrix matrix product
         attn_applied = torch.bmm(attn_weights, encoder_outputs).view(1, batch_size, -1)
 
@@ -91,6 +98,7 @@ class AttentionDecoderRNN(nn.Module):
         output = self.attn_combine(output).unsqueeze(0)
 
         output = F.relu(output)
+        # output is (1, BATCH_SIZE, HIDDEN_SIZE)
         output, hidden = self.gru(output, hidden)
 
         output = self.output_with_activation(output[0])
@@ -173,6 +181,8 @@ class Seq2SeqRNN(pl.LightningModule):
             decoder_input = topi.squeeze().unsqueeze(1).detach()
             # now decoder input is of shape (batch_size, 1)
 
+            # TODO: ignore loss from PAD
+
             # NLLLoss expects NXC tensor as the source and (N,) shape tensor for target
             loss += loss_function(decoder_output, target_tensor[:, word_index])
 
@@ -198,7 +208,7 @@ class Seq2SeqRNN(pl.LightningModule):
                     decoder_input, decoder_hidden, encoder_outputs
                 )
                 loss += loss_function(decoder_output, target_tensor[:, word_index])
-                decoder_input = target_tensor[:, word_index]
+                decoder_input = target_tensor[:, word_index].unsqueeze(1)
         else:
             loss = self._move_decoder_forward(
                 decoder_input,
@@ -262,11 +272,12 @@ class Seq2SeqRNN(pl.LightningModule):
 
         for word_index in range(self.config.max_length):
             decoder_output, decoder_hidden, decoder_attention = self.decoder(
-                decoder_input, decoder_hidden, encoder_outputs)
+                decoder_input, decoder_hidden, encoder_outputs
+            )
             decoder_attentions[word_index] = decoder_attention.data
             topv, topi = decoder_output.data.topk(1)
             if topi.item() == self.config.eos_token:
-                decoded_words.append('<EOS>')
+                decoded_words.append("<EOS>")
                 break
             else:
                 decoded_words.append(topi.item())

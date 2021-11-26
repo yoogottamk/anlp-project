@@ -70,6 +70,10 @@ class EuroParl(EuroParlRaw):
         self.config = config
         self._len = int(self._len * self.config.dataset_fraction)
 
+        # bad hack for making it work
+        # always remain a multiple of 4
+        self._len -= self._len % 4
+
         self.de_tok = MosesTokenizer(lang="de")
         self.en_tok = MosesTokenizer()
 
@@ -121,8 +125,18 @@ class EuroParl(EuroParlRaw):
             wf_de += local_wf_de
             wf_en += local_wf_en
 
-        w2i_de = {"__UNKNOWN__": 0, self.config.bos_token: 1, self.config.eos_token: 2}
-        w2i_en = {"__UNKNOWN__": 0, self.config.bos_token: 1, self.config.eos_token: 2}
+        w2i_de = {
+            "__PAD__": 0,
+            "__UNKNOWN__": 1,
+            self.config.bos_token: 2,
+            self.config.eos_token: 3,
+        }
+        w2i_en = {
+            "__PAD__": 0,
+            "__UNKNOWN__": 1,
+            self.config.bos_token: 2,
+            self.config.eos_token: 3,
+        }
 
         i = len(w2i_de)
         for w, f in tqdm(wf_de.items(), desc="Mapping German words to indices"):
@@ -157,8 +171,10 @@ class EuroParl(EuroParlRaw):
         en_tokens.append(self.config.eos_token)
 
         # TODO: fix this in preprocessing
-        de = np.array([self.w2i_de.get(token, 0) for token in de_tokens])
-        en = np.array([self.w2i_en.get(token, 0) for token in en_tokens])
+        # lower part not part of TODO
+        # Make UNK 1 for pad and UNK to be diff symbols
+        de = np.array([self.w2i_de.get(token, 1) for token in de_tokens])
+        en = np.array([self.w2i_en.get(token, 1) for token in en_tokens])
 
         padded_de = np.pad(de, (0, self.config.max_length - len(de)))
         padded_en = np.pad(en, (0, self.config.max_length - len(en)))
