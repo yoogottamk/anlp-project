@@ -40,10 +40,6 @@ hparams:
   type: str
   default: <EOS>
   help: end sentence token
-- name: checkpoint-path
-  type: str
-  default:
-  help: path to model checkpoint
 - name: logfile
   type: str
   default: logs/run{}

@@ -1,5 +1,7 @@
 import logging
 
+import torch
+
 from anlp_project.config import Config
 from anlp_project.datasets.europarl import EuroParl
 from anlp_project.models.seq2seq import Seq2SeqRNN
@@ -23,12 +25,8 @@ def inference_model(config: Config, checkpoint_file: str, input_sentence: str):
         output_size,
     )
 
-    model = Seq2SeqRNN.load_from_checkpoint(
-        checkpoint_file,
-        config=config,
-        input_size=input_size,
-        output_size=output_size,
-    )
+    model = Seq2SeqRNN(config, input_size, output_size)
+    model.load_state_dict(torch.load(checkpoint_file)["state_dict"])
     model.eval()
 
     logging.info(

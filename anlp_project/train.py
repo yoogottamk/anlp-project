@@ -4,6 +4,7 @@ import os
 
 import torch
 from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 from torch.utils.data import DataLoader, random_split
 
@@ -33,7 +34,7 @@ def train_model(config: Config):
     train_length = int(total_entries * train_ratio)
     # bad hack to make this work
     # always remain a multiple of 4
-    train_length -= train_length % 4
+    train_length -= train_length % 16
     test_length = total_entries - train_length
 
     cpu_count = int(os.getenv("SLURM_CPUS_ON_NODE", str(multiprocessing.cpu_count())))
@@ -57,6 +58,7 @@ def train_model(config: Config):
     checkpoint_path = get_checkpoint_dir(config)
     trainer = Trainer(
         logger=wandb_logger if config.log_wandb else [],
+        callbacks=[ModelCheckpoint(dirpath=checkpoint_path, every_n_epochs=1)],
         max_epochs=config.n_epochs,
         gpus=gpu_count,
         strategy="ddp",

@@ -77,7 +77,7 @@ class EuroParl(EuroParlRaw):
 
         # bad hack for making it work
         # always remain a multiple of 4
-        self._len -= self._len % 4
+        self._len -= self._len % 16
 
         self.de_tok = MosesTokenizer(lang="de")
         self.en_tok = MosesTokenizer()
