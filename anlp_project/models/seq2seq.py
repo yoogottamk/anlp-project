@@ -126,7 +126,7 @@ class Seq2SeqRNN(pl.LightningModule):
         # first token of first sentence in the batch
         bos_token = input_tensor[0, 0]
         # sanity check
-        assert bos_token == 1, "What is the value of bos token in w2i_en?"
+        assert bos_token == 2, f"Value of bos token in w2i_en is {bos_token}"
 
         # inputs and targets have been padded
         word_count = input_tensor.size(1)
@@ -226,12 +226,12 @@ class Seq2SeqRNN(pl.LightningModule):
 
         train_loss = loss.item() / target_word_count
 
-        self.log("train_loss", train_loss, on_step=True, on_epoch=True)
+        self.log("train_loss", train_loss, on_step=True, on_epoch=True, prog_bar=True)
         return {"train_loss": train_loss}
 
     def configure_optimizers(self):
-        enc_opt = optim.SGD(self.encoder.parameters(), self.config.lr)
-        dec_opt = optim.SGD(self.decoder.parameters(), self.config.lr)
+        enc_opt = optim.Adam(self.encoder.parameters(), self.config.lr)
+        dec_opt = optim.Adam(self.decoder.parameters(), self.config.lr)
 
         return enc_opt, dec_opt
 
@@ -254,7 +254,7 @@ class Seq2SeqRNN(pl.LightningModule):
 
         val_loss = loss.item() / target_word_count
 
-        self.log("validation_loss", val_loss, on_step=True, on_epoch=True)
+        self.log("validation_loss", val_loss, on_step=True, on_epoch=True, prog_bar=True)
         return val_loss
 
     def evaluate(self, input_sentence: List[int]):
@@ -272,20 +272,18 @@ class Seq2SeqRNN(pl.LightningModule):
         ) = self._move_encoder_forward(batch)
 
         decoded_words = []
-        decoder_attentions = torch.zeros(self.config.max_length, self.config.max_length)
 
         for word_index in range(self.config.max_length):
             decoder_output, decoder_hidden, decoder_attention = self.decoder(
                 decoder_input, decoder_hidden, encoder_outputs
             )
-            decoder_attentions[word_index] = decoder_attention.data
-            topv, topi = decoder_output.data.topk(1)
+            topv, topi = decoder_output[:,].topk(1)
             if topi.item() == self.config.eos_token:
                 decoded_words.append("<EOS>")
                 break
             else:
                 decoded_words.append(topi.item())
 
-            decoder_input = topi.squeeze().detach().view(1, 1)
+            decoder_input = torch.LongTensor([topi])
 
         return decoded_words

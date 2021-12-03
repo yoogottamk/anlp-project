@@ -63,4 +63,4 @@ def cli_decorator(f):
 
 
 def get_checkpoint_dir(config):
-    return config.checkpoint_path or str(Path(os.getcwd()) / "checkpoints")
+    return str(Path(os.getcwd()) / "checkpoints")

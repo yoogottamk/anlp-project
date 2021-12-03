@@ -30,7 +30,7 @@ hparams:
   help: Minimum number of times a word must occur for it to be in vocab
 - name: max-length
   type: int
-  default: 100
+  default: 32
   help: maximum number of tokens in input/output sentence
 - name: bos-token
   type: str

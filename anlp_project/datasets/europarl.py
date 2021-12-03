@@ -60,9 +60,9 @@ class EuroParlRaw(Dataset):
 
 
 class EuroParl(EuroParlRaw):
-    UNK_TOKEN_INDEX = 0
-    BOS_TOKEN_INDEX = 1
-    EOS_TOKEN_INDEX = 2
+    UNK_TOKEN_INDEX = 1
+    BOS_TOKEN_INDEX = 2
+    EOS_TOKEN_INDEX = 3
 
     def __init__(
         self,
@@ -183,15 +183,13 @@ class EuroParl(EuroParlRaw):
 
     def sentence_to_indices(self, sentence: str):
         tokens = self.de_tok.tokenize(sentence)
-        indices = [self.w2i_de.get(token, 0) for token in tokens]
+        indices = [self.w2i_de.get(token, 1) for token in tokens]
         return indices
 
     def indices_to_sentence(self, indices: List[int]):
         tokens = []
-        # TODO: pickle the reverse lookup object also
+        i2w_en = {i: w for w, i in self.w2i_en.items()}
         for idx in indices:
-            for k, v in self.w2i_en.items():
-                if v == idx:
-                    tokens.append(k)
+            tokens.append(i2w_en[idx])
 
         return " ".join(tokens)

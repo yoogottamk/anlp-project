@@ -15,7 +15,7 @@ from anlp_project.utils import get_checkpoint_dir
 
 
 def train_model(config: Config):
-    dataset = EuroParl(config=config)
+    dataset = EuroParl(config=config, force_regenerate_mappings=True)
 
     # input is English, output is German
     input_size = dataset.de_vocab_size
