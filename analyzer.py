@@ -35,7 +35,7 @@ def make_plots():
     print("Reading through the file, should take 10-15 seconds")
 
     pati = 0
-    PATIENCE = 10
+    PATIENCE = -1
 
     with open(filepath, "r") as f:
         for line in f:
@@ -43,65 +43,70 @@ def make_plots():
                 de, en = line.split("\t")
                 de_toks = de.split(" ")
                 en_toks = en.split(" ")
-                num_de_toks = []
-                num_en_toks = []
 
-                for tok in de_toks:
-                    x = num_matcher.match(tok)
-                    if x:
-                        num_de_toks.append((x.group(0), x.group(1)))
-                num_de_toks_new = list(map(itemgetter(1), num_de_toks))
+                if PATIENCE != -1:
+                    num_de_toks = []
+                    num_en_toks = []
 
-                for tok in en_toks:
-                    x = num_matcher.match(tok)
-                    if x:
-                        num_en_toks.append((x.group(0), x.group(1)))
-                num_en_toks_new = list(map(itemgetter(1), num_en_toks))
+                    for tok in de_toks:
+                        x = num_matcher.match(tok)
+                        if x:
+                            num_de_toks.append((tok, x.group(1)))
+                    num_de_toks_new = list(map(itemgetter(1), num_de_toks))
 
-                for (tok_org, tok) in num_de_toks:
-                    if tok not in num_en_toks_new:
-                        # timestamp
-                        if tok_org.endswith(".00") or tok_org.endswith(".30"):
-                            continue
-                        print(f"Missing: {tok}") 
-                        print(f"Mistmatch in: {line}")
-                        # print(num_en_toks_new)
-                        # print(num_de_toks_new)
-                        # print(de_toks)
-                        # print(en_toks)
-                        pati += 1
-                        if pati == PATIENCE:
-                            return
-                        break
-                for (tok_org, tok) in num_en_toks:
-                    if tok not in num_de_toks_new:
-                        # timestamp
-                        if tok_org.endswith(".00") or tok_org.endswith(".30"):
-                            continue
-                        print(f"Missing: {tok}") 
-                        print(f"Mistmatch in: {line}")
-                        pati += 1
-                        if pati == PATIENCE:
-                            return
-                        break
+                    for tok in en_toks:
+                        x = num_matcher.match(tok)
+                        if x:
+                            num_en_toks.append((tok, x.group(1)))
+                    num_en_toks_new = list(map(itemgetter(1), num_en_toks))
 
-                for tok in num_de_toks:
-                    de_number_counter[tok] += 1
-                for tok in num_en_toks:
-                    en_number_counter[tok] += 1
+                    for (tok_org, tok) in num_de_toks:
+                        if tok not in num_en_toks_new:
+                            # timestamp
+                            if tok_org.endswith(".00") or tok_org.endswith(".30"):
+                                continue
+                            print(f"Missing: {tok} {tok_org}") 
+                            print(f"Mistmatch in: {line}")
+                            print(num_en_toks_new)
+                            print(num_de_toks_new)
+                            # print(de_toks)
+                            # print(en_toks)
+                            pati += 1
+                            if pati == PATIENCE:
+                                return
+                            break
+                    for (tok_org, tok) in num_en_toks:
+                        if tok not in num_de_toks_new:
+                            # timestamp
+                            if re.search(r"\.\d0$", tok_org):
+                                continue
+                            print(f"Missing: {tok} {tok_org}") 
+                            print(f"Mistmatch in: {line}")
+                            print(num_en_toks_new)
+                            print(num_de_toks_new)
+                            pati += 1
+                            if pati == PATIENCE:
+                                return
+                            break
 
-                de_counts.append(len(de_toks))
-                en_counts.append(len(en_toks))
+                    for tok in num_de_toks:
+                        de_number_counter[tok] += 1
+                    for tok in num_en_toks:
+                        en_number_counter[tok] += 1
+
+                    de_counts.append(len(de_toks))
+                    en_counts.append(len(en_toks))
                 valid_sentence_count += 1
             except ValueError:
                 invalid_sentence_count += 1
 
     TOP_K = 100
-    de_counts = sorted(de_number_counter.items(), key=itemgetter(1), reverse=True)[:TOP_K]
-    en_counts = sorted(en_number_counter.items(), key=itemgetter(1), reverse=True)[:TOP_K]
-    print(de_counts)
-    print(en_counts)
-    return
+    de_counts_cnt = sorted(de_number_counter.items(), key=itemgetter(1), reverse=True)[:TOP_K]
+    en_counts_cnt = sorted(en_number_counter.items(), key=itemgetter(1), reverse=True)[:TOP_K]
+    print("Top numbers")
+    print(de_counts_cnt)
+    print(en_counts_cnt)
+    print("-------")
 
     token_diff = [de_counts[i] - en_counts[i] for i in range(len(de_counts))]
     token_diff.sort()
