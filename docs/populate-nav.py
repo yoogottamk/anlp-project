@@ -32,7 +32,7 @@ def get_nav_links():
     """
     nav_links = []
 
-    for module in ["anlp_project"]:
+    for module in ["anlp_project", "analysis"]:
         for dirp, _, files in os.walk(module):
             md_files = []
             # generate {"title": "path"} for each file
