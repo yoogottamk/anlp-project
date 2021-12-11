@@ -259,6 +259,7 @@ def main():
     if data_args.test_file is not None:
         data_files["test"] = data_args.test_file
         extension = data_args.test_file.split(".")[-1]
+    extension="json"
     raw_datasets = load_dataset(extension, data_files=data_files, cache_dir=model_args.cache_dir)
 
     config = AutoConfig.from_pretrained(
@@ -510,4 +511,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    print(main())
