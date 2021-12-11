@@ -254,7 +254,9 @@ class Seq2SeqRNN(pl.LightningModule):
 
         val_loss = loss.item() / target_word_count
 
-        self.log("validation_loss", val_loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log(
+            "validation_loss", val_loss, on_step=True, on_epoch=True, prog_bar=True
+        )
         return val_loss
 
     def evaluate(self, input_sentence: List[int]):
@@ -277,7 +279,9 @@ class Seq2SeqRNN(pl.LightningModule):
             decoder_output, decoder_hidden, decoder_attention = self.decoder(
                 decoder_input, decoder_hidden, encoder_outputs
             )
-            topv, topi = decoder_output[:,].topk(1)
+            topv, topi = decoder_output[
+                :,
+            ].topk(1)
             if topi.item() == self.config.eos_token:
                 decoded_words.append("<EOS>")
                 break
