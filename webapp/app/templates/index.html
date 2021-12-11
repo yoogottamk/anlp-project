@@ -153,20 +153,19 @@ body {
         <div class="container d-flex align-items-center justify-content-center text-center h-100">
           <div>
             <h1 class="mb-3">Übersetzerin</h1>
-            <h5 class="mb-4" align="center">
-                <div class="switch-button">
-                    <input class="switch-button-checkbox" type="checkbox"></input>
-                    <label class="switch-button-label" for=""><span class="switch-button-label-span">DE&rarr;EN</span></label>
-                </div>
-            </h5>
 
-            <div class="form-group">
-              <form id="inputform">
+            <div class="form-group" align="center">
+              <div class="switch-button">
+                  <input class="switch-button-checkbox" type="checkbox" id="inputlang"></input>
+                  <label class="switch-button-label" for=""><span class="switch-button-label-span">DE&rarr;EN</span></label>
+              </div>
+              <br>
+              <div> 
                   <label for="inputsentence">Enter input sentence</label>
                   <input type="text" class="input-field form-control" id="inputsentence" placeholder="Enter input sentence">
-                  <br>
-                  <button type="button" class="btn btn-primary" id="translate">Translate!</button>
-              </form>
+              </div>
+              <br>
+              <button type="button" class="btn btn-primary" id="translate">Translate!</button>
             </div>
 
             <div>
@@ -200,13 +199,15 @@ body {
   <!--Footer-->
 <script>
 translate.onclick = function() {
+    const isEn2De = inputlang.checked;
+
     const elm = document.getElementById("inputform");
     console.assert(elm);
     const url = '/translate';
     outputsentence.value = "Inference running...";
     fetch(url, {
         method : "POST",
-        body: JSON.stringify({"sentence": inputsentence.value})
+        body: JSON.stringify({sentence: inputsentence.value, en2de: isEn2De})
     }).then(
         response => response.text()
     ).then(
