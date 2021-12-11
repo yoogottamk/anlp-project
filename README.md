@@ -56,7 +56,10 @@ Uncomment when repo public
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Webapp IMAGE HERE
+<!-- ![image](https://user-images.githubusercontent.com/6308683/145682893-2bb2553b-b46a-42ba-b486-348184108fdc.png) -->
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/6308683/145682893-2bb2553b-b46a-42ba-b486-348184108fdc.png" alt="translator webapp" width="750px"/>
+</div>
 
 **_Übersetzerin_** is our comprehensive and robust ML pipeline built for bidirectional text translation between German and English languages. Key features:
 
