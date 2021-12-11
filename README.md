@@ -3,6 +3,12 @@
   <i>German to English translator system</i>
 </p>
 
-https://github.com/matiassingers/awesome-readme
-https://github.com/othneildrew/Best-README-Template
-"cool github project readme"
+[![Contributors][contributors-shield]][contributors-url]
+[![Stargazers][stars-shield]][stars-url]
+[![MIT License][license-shield]][license-url]
+
+[contributors-shield]: https://img.shields.io/github/contributors/yoogottamk/anlp-project-nmt?style=for-the-badge
+[contributors-url]: https://github.com/yoogottamk/anlp-project-nmt/graphs/contributors
+[stars-shield]: https://img.shields.io/github/stars/yoogottamk/anlp-project-nmt?style=for-the-badge
+[stars-url]: https://github.com/yoogottamk/anlp-project-nmt/stargazers
+[license-url]: https://github.com/yoogottamk/anlp-project-nmt/blob/master/LICENSE.txt
