@@ -137,7 +137,30 @@ python app.py
 ### Model training
 
 #### Seq2Seq training
+```
+anlp_project train
+```
+
+For checking the various options available, run
+```
+anlp_project train --help
+```
+
+We trained the model with
+```
+anlp_project train --batch-size 32 --n-epochs 10 --min-occurances-for-vocab 5
+```
+
 #### T5 training
+First, you'll need to generate the `jsonl` file.
+```
+python anlp_project/datasets/convert-to-jsonl.py
+```
+
+Now, to train, run:
+```
+python anlp_project/models/transformer.py --model_name_or_path t5-small --output_dir model --train_file $PWD/dataset.jsonl --source_lang de --target_lang en --source_prefix "translate German to English: " --per_device_train_batch_size=4 --per_device_eval_batch_size=4 --do_train
+```
 
 ### Webapp
 
