@@ -1,7 +1,7 @@
 <div align="center">
   <img src="documents/logo_transparent.png" alt="Our project logo" title="'Translator' in German" /><br>
   <p>
-      German to English translator system
+      German-English bidirectional translator system
       <br />
       <a href="https://yoogottamk.github.io/anlp-project"><strong>Explore the docs »</strong></a>
       <br />
