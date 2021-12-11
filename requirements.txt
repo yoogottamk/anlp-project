@@ -6,3 +6,7 @@ rich
 click
 sacremoses
 black
+mkdocs
+pyyaml
+mkdocstrings
+mkdocs-material

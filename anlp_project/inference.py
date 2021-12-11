@@ -10,6 +10,9 @@ from anlp_project.models.seq2seq import Seq2SeqRNN
 
 
 def inference_model(config: Config, checkpoint_file: str, input_sentence: str):
+    """
+    Inference for rudimentary seq2seq model
+    """
     if not input_sentence:
         # parliament related sample sentence
         # it is German for: "Our citizens need better water supply to their house"
@@ -48,6 +51,9 @@ def inference_model(config: Config, checkpoint_file: str, input_sentence: str):
 
 
 def inference_t5(checkpoint_file: str, input_sentence: str):
+    """
+    Inference for baseline++ model
+    """
     # Initialize the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(checkpoint_file)
 

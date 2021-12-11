@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="documents/logo_transparent.png" alt="Our project logo" title="'Translator' in German" /><br>
+  <img src="documents/logo-padding.png" alt="Our project logo" title="'Translator' in German" /><br>
   <p>
       German-English bidirectional translator system
       <br />
@@ -8,9 +8,9 @@
       <br />
       <a href="https://github.com/othneildrew/Best-README-Template">Run demo WebAPP</a>
       <br />
-      <a href="https://github.com/yoogottamk/anlp-project-nmt/issues/new">Report Bug</a>
+      <a href="https://github.com/yoogottamk/anlp-project/issues/new">Report Bug</a>
       <br />
-      <a href="https://github.com/yoogottamk/anlp-project-nmt/issues/new">Request Feature</a>
+      <a href="https://github.com/yoogottamk/anlp-project/issues/new">Request Feature</a>
   </p>
 </div>
 
@@ -120,9 +120,11 @@ Our package is provided as a Python module. Perform these steps in root director
 
 #### Webapp
 
-* `cd webapp`
-* `pip install -r requirements.txt`
-* `python app.py`
+```sh
+cd webapp
+pip install -r requirements.txt
+python app.py
+```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -136,7 +138,7 @@ Our package is provided as a Python module. Perform these steps in root director
 
 ### Webapp
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+_For more examples, please refer to the [Documentation](https://yoogottamk.github.io/anlp-project)_
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

@@ -16,6 +16,12 @@ from anlp_project.config import DATA_ROOT, Config
 
 
 def _word_freq_calculator(db_path, start, end):
+    """
+    Helper function for calculating word frequencies in dataset
+
+    top module level function needed for pickling, which happens during
+    multiprocessing
+    """
     raw_ds = EuroParlRaw(db_path)
 
     de_tok, en_tok = MosesTokenizer(lang="de"), MosesTokenizer()
@@ -38,6 +44,10 @@ def _word_freq_calculator(db_path, start, end):
 
 
 class EuroParlRaw(Dataset):
+    """
+    Raw dataset: tuples of (de, en) pairs
+    """
+
     def __init__(self, db_path=DATA_ROOT / "dataset.sqlite"):
         super().__init__()
         self.db_path = db_path
@@ -60,6 +70,12 @@ class EuroParlRaw(Dataset):
 
 
 class EuroParl(EuroParlRaw):
+    """
+    Processed dataset
+
+    Returns tensors after padding
+    """
+
     UNK_TOKEN_INDEX = 1
     BOS_TOKEN_INDEX = 2
     EOS_TOKEN_INDEX = 3
