@@ -201,8 +201,6 @@ body {
 translate.onclick = function() {
     const isEn2De = inputlang.checked;
 
-    const elm = document.getElementById("inputform");
-    console.assert(elm);
     const url = '/translate';
     outputsentence.value = "Inference running...";
     fetch(url, {
