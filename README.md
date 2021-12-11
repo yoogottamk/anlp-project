@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="documents/logo_transparent.png" alt="Our project logo" title="'Translator' in German" /><br>
+  <img src="documents/logo-padding.png" alt="Our project logo" title="'Translator' in German" /><br>
   <p>
       German-English bidirectional translator system
       <br />
