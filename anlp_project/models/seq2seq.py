@@ -1,6 +1,6 @@
 import logging
 from random import random
-from typing import Tuple, List
+from typing import List, Tuple
 
 import pytorch_lightning as pl
 import torch

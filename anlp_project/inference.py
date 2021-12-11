@@ -1,9 +1,11 @@
 import logging
 
 import torch
+from tqdm.auto import tqdm
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from anlp_project.config import Config
-from anlp_project.datasets.europarl import EuroParl
+from anlp_project.datasets.europarl import EuroParl, EuroParlRaw
 from anlp_project.models.seq2seq import Seq2SeqRNN
 
 
@@ -11,7 +13,9 @@ def inference_model(config: Config, checkpoint_file: str, input_sentence: str):
     if not input_sentence:
         # parliament related sample sentence
         # it is German for: "Our citizens need better water supply to their house"
-        input_sentence = "unsere burger brauchen eine bessere wasserversorgung ihres hauses"
+        input_sentence = (
+            "unsere burger brauchen eine bessere wasserversorgung ihres hauses"
+        )
 
     dataset = EuroParl(config=config)
 
@@ -41,3 +45,20 @@ def inference_model(config: Config, checkpoint_file: str, input_sentence: str):
     # convert token integers back to words
     decoded_sentence = dataset.indices_to_sentence(decoded_words_tokens)
     print(decoded_sentence)
+
+
+def inference_t5(checkpoint_file: str, input_sentence: str):
+    # Initialize the tokenizer
+    tokenizer = AutoTokenizer.from_pretrained(checkpoint_file)
+
+    # Initialize the model
+    model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint_file)
+    text = f"translate German to English: {input_sentence}"
+
+    tokenized_text = tokenizer([text], return_tensors="pt", padding=True)
+
+    # Perform translation and decode the output
+    translation = model.generate(**tokenized_text)
+    translated_text = tokenizer.batch_decode(translation, skip_special_tokens=True)
+
+    return translated_text[0]

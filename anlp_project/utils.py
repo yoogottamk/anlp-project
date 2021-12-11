@@ -1,7 +1,7 @@
+import os
 from functools import wraps
 from pathlib import Path
 from pydoc import locate
-import os
 
 import click
 import yaml

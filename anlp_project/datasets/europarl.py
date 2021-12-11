@@ -5,7 +5,7 @@ import pickle
 import sqlite3
 from collections import Counter
 from pathlib import Path
-from typing import Tuple, List
+from typing import List, Tuple
 
 import numpy as np
 from sacremoses.tokenize import MosesTokenizer
