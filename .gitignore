@@ -147,5 +147,6 @@ cython_debug/
 /logs
 /wandb
 
-# this contains the model checkpoints
+# one of these contains the model checkpoints
 /anlp-project-nmt
+/checkpoints

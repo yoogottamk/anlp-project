@@ -30,7 +30,7 @@ hparams:
   help: Minimum number of times a word must occur for it to be in vocab
 - name: max-length
   type: int
-  default: 100
+  default: 32
   help: maximum number of tokens in input/output sentence
 - name: bos-token
   type: str
@@ -40,10 +40,6 @@ hparams:
   type: str
   default: <EOS>
   help: end sentence token
-- name: checkpoint-path
-  type: str
-  default:
-  help: path to model checkpoint
 - name: logfile
   type: str
   default: logs/run{}
@@ -56,3 +52,10 @@ hparams:
   type: str
   default: data/w2i.obj
   help: path to the words to index mapping
+- name: dropout
+  type: float
+  default: 0.1
+  help: percent of nodes to dropout in decoder
+- name: log-wandb
+  type: bool
+  default: false
