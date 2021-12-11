@@ -10,6 +10,13 @@ DATA_ROOT = Path(os.getenv("DS_DIR", str(PROJECT_ROOT / "dataset")))
 
 
 class Config:
+    """
+    Global model configuration
+
+    Collects defaults from `hparams.yaml` and overrides them with CLI arguments
+    Available everywhere: model, dataset, trainer, etc
+    """
+
     n_epochs: int
     lr: float
     disable_print_config: int

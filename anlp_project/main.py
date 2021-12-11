@@ -10,6 +10,9 @@ from anlp_project.utils import cli_decorator
 
 @cli_decorator
 def anlp_project(**kwargs):
+    """
+    Entrypoint for `anlp_project` CLI
+    """
     config = Config(**kwargs)
 
     logging.basicConfig(

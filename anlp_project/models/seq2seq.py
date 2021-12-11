@@ -1,4 +1,3 @@
-import logging
 from random import random
 from typing import List, Tuple
 
@@ -11,6 +10,10 @@ from anlp_project.config import Config
 
 
 class EncoderRNN(nn.Module):
+    """
+    Module for RNN Encoder
+    """
+
     def __init__(self, config: Config, input_size: int):
         super().__init__()
         self.config = config
@@ -32,6 +35,10 @@ class EncoderRNN(nn.Module):
 
 
 class DecoderRNN(nn.Module):
+    """
+    Module for simple RNN Decoder
+    """
+
     def __init__(self, config: Config, output_size: int):
         super().__init__()
         self.config = config
@@ -52,6 +59,10 @@ class DecoderRNN(nn.Module):
 
 
 class AttentionDecoderRNN(nn.Module):
+    """
+    Module for attention based RNN Decoder
+    """
+
     def __init__(
         self,
         config: Config,
@@ -107,6 +118,10 @@ class AttentionDecoderRNN(nn.Module):
 
 
 class Seq2SeqRNN(pl.LightningModule):
+    """
+    Seq2Seq Module, uses Encoder and attention Decoder
+    """
+
     def __init__(self, config: Config, input_size: int, output_size: int):
         super().__init__()
         self.config = config
@@ -121,6 +136,19 @@ class Seq2SeqRNN(pl.LightningModule):
         self.automatic_optimization = False
 
     def _move_encoder_forward(self, batch: Tuple[torch.LongTensor, torch.LongTensor]):
+        """
+        helper function for flowing data through encoder
+
+        Args:
+            batch: (input_tensor, output_tensor)
+
+        Returns:
+            decoder_input: decoder input
+            decoder_hidden: hidden state for decoder
+            target_output_tensor: desired tensor
+            config.max_length: max length of tensors
+            encoder_outputs: encoder output
+        """
         input_tensor, target_output_tensor = batch[0], batch[1]
         batch_size = input_tensor.size(0)
         # first token of first sentence in the batch
@@ -168,6 +196,19 @@ class Seq2SeqRNN(pl.LightningModule):
         target_word_count,
         encoder_outputs,
     ):
+        """
+        helper function for flowing data through decoder
+
+        Args:
+            decoder_input: decoder input
+            decoder_hidden: hidden state for decoder
+            target_tensor: desired tensor
+            target_word_count: max length of tensors
+            encoder_outputs: encoder output
+
+        Returns:
+            loss
+        """
         loss_function = nn.NLLLoss()
         loss = 0
 
@@ -254,7 +295,9 @@ class Seq2SeqRNN(pl.LightningModule):
 
         val_loss = loss.item() / target_word_count
 
-        self.log("validation_loss", val_loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log(
+            "validation_loss", val_loss, on_step=True, on_epoch=True, prog_bar=True
+        )
         return val_loss
 
     def evaluate(self, input_sentence: List[int]):
@@ -277,7 +320,9 @@ class Seq2SeqRNN(pl.LightningModule):
             decoder_output, decoder_hidden, decoder_attention = self.decoder(
                 decoder_input, decoder_hidden, encoder_outputs
             )
-            topv, topi = decoder_output[:,].topk(1)
+            topv, topi = decoder_output[
+                :,
+            ].topk(1)
             if topi.item() == self.config.eos_token:
                 decoded_words.append("<EOS>")
                 break

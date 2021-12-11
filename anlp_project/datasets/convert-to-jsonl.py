@@ -6,6 +6,11 @@ from anlp_project.datasets.europarl import EuroParlRaw
 
 
 def main():
+    """
+    Converts dataset to jsonlines format
+
+    needed for baseline++ training
+    """
     dataset = EuroParlRaw()
     with open("dataset.jsonl", "w") as f:
         for de, en in tqdm(dataset):

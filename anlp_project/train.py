@@ -15,6 +15,9 @@ from anlp_project.utils import get_checkpoint_dir
 
 
 def train_model(config: Config):
+    """
+    Model trainer for seq2seq
+    """
     dataset = EuroParl(config=config, force_regenerate_mappings=True)
 
     # input is English, output is German
