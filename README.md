@@ -3,8 +3,10 @@
   <p>
       German-English bidirectional translator system
       <br />
-      <a href="https://yoogottamk.github.io/anlp-project"><strong>Explore the docs »</strong></a>
+      <a href="https://github.com/yoogottamk/anlp-project/blob/master/documents/12_EnElPi_Report.pdf"><strong>Read Our Report</strong></a>
       <br />
+      <br />
+      <a href="https://yoogottamk.github.io/anlp-project"><strong>Explore the docs »</strong></a>
       <br />
       <a href="https://github.com/yoogottamk/anlp-project#usage">Run demo WebAPP</a>
       <br />
