@@ -1,3 +1,4 @@
+import os
 from functools import wraps
 from pathlib import Path
 from pydoc import locate
@@ -11,6 +12,15 @@ def cli_decorator(f):
     def __cli_decorator(*args, **kwargs):
         _f = click.command("anlp_project")(f)
         _f = click.argument("subcmd")(_f)
+        _f = click.option(
+            "--checkpoint", required=False, help="Path to model checkpoint to evaluate"
+        )(_f)
+        _f = click.option(
+            "--sentence",
+            required=False,
+            help="Sentence to evaluate model on",
+            default="",
+        )(_f)
 
         hparams = yaml.safe_load(
             (Path(__file__).parent / Path("hparams.yaml")).read_text()
@@ -50,3 +60,7 @@ def cli_decorator(f):
         return _f(*args, **kwargs)
 
     return __cli_decorator
+
+
+def get_checkpoint_dir(config):
+    return str(Path(os.getcwd()) / "checkpoints")
