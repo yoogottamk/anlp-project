@@ -6,7 +6,7 @@
       <a href="https://yoogottamk.github.io/anlp-project"><strong>Explore the docs »</strong></a>
       <br />
       <br />
-      <a href="https://github.com/othneildrew/Best-README-Template">Run demo WebAPP</a>
+      <a href="https://github.com/yoogottamk/anlp-project#usage">Run demo WebAPP</a>
       <br />
       <a href="https://github.com/yoogottamk/anlp-project/issues/new">Report Bug</a>
       <br />
