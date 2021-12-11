@@ -1,3 +1,7 @@
+"""
+Entry point module for CLI interface
+"""
+
 import logging
 
 from rich.logging import RichHandler

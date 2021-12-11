@@ -72,6 +72,7 @@ Uncomment when repo public
 * [🤗 Huggingface](https://huggingface.co/)
 * [Bootstrap](https://getbootstrap.com)
 * [MDBootstrap](https://mdbootstrap.com/)
+* [Flask](https://flask.palletsprojects.com/en/2.0.x/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -84,6 +85,7 @@ Uncomment when repo public
 .
 ├── anlp_project     # code for our ML pipeline
 ├── documents        # documentation for our project
+├── mkdocs.yml       # configuration for our documentation website
 ├── README.md        # you are here
 ├── scripts          # script to download dataset easily
 ├── requirements.txt # pip install this
@@ -98,7 +100,12 @@ anlp_project
 ├── datasets                         # module for dataset loader processes
 ├── hparams.yaml                     # centralized file for all model hyperparameters
 ├── inference.py                     # runs inference
-# TODO
+├── main.py                          # entrypoint for our CLI interface
+├── models                           # runs inference
+├──── seq2seq.py                     # seq2seq RNN model implementation
+├──── transforer.py                  # transformer model implementation
+├── train.py                         # initializes Trainer to train selected model on selected dataset
+└── utils.py                         # common utility functions for train and inference
 ```
 
 ### Prerequisites
@@ -123,10 +130,12 @@ Our package is provided as a Python module. Perform these steps in root director
 
 #### Webapp
 
+To start the Flask webapp:
+
 ```sh
 cd webapp
 pip install -r requirements.txt
-python app.py
+python app/app.py
 ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
