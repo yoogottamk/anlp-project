@@ -17,10 +17,11 @@ def get_translation():
     data = json.loads(request.data.decode())
     sentence = data["sentence"]
 
-    result = subprocess.run(f"anlp_project inference --checkpoint-path checkpoint-340500 --sentence \"{sentence}\"", shell=True).stdout
-    print(result)
+    result = subprocess.run(f"anlp_project inference --checkpoint checkpoint-340500 --sentence \"{sentence}\"", shell=True, capture_output=True).stdout.decode()
 
-    return result
+    sentence = result.strip().split('\n')[-1]
+
+    return sentence
 
 if __name__ == "__main__":
     app.run(port=8000, debug=True)
