@@ -1,9 +1,9 @@
 <div align="center">
-  <img src="docs/logo_transparent.png" alt="Our project logo" title="'Translator' in German" /><br>
+  <img src="documents/logo_transparent.png" alt="Our project logo" title="'Translator' in German" /><br>
   <p>
       German to English translator system
       <br />
-      <a href="READTHEDOCS"><strong>Explore the docs »</strong></a>
+      <a href="https://yoogottamk.github.io/anlp-project"><strong>Explore the docs »</strong></a>
       <br />
       <br />
       <a href="https://github.com/othneildrew/Best-README-Template">Run demo WebAPP</a>
@@ -80,10 +80,10 @@ Webapp IMAGE HERE
 ```
 .
 ├── anlp_project     # code for our ML pipeline
-├── docs             # documentation for our project
+├── documents        # documentation for our project
 ├── README.md        # you are here
 ├── scripts          # script to download dataset easily
-├── requirements.txt                 # pip install this
+├── requirements.txt # pip install this
 └── setup.py         # used to setup our pip package for easy distributions
 ```
 
