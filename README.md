@@ -7,7 +7,9 @@
       <br />
       <br />
       <a href="https://github.com/othneildrew/Best-README-Template">Run demo WebAPP</a>
+      <br />
       <a href="https://github.com/yoogottamk/anlp-project-nmt/issues/new">Report Bug</a>
+      <br />
       <a href="https://github.com/yoogottamk/anlp-project-nmt/issues/new">Request Feature</a>
   </p>
 </div>
@@ -40,11 +42,8 @@ Uncomment when repo public
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
@@ -59,7 +58,7 @@ Uncomment when repo public
 
 Webapp IMAGE HERE
 
-_Übersetzerin_ is our comprehensive and robust ML pipeline built for bidirectional text translation between German and English languages. Key features:
+**_Übersetzerin_** is our comprehensive and robust ML pipeline built for bidirectional text translation between German and English languages. Key features:
 
 1. A webapp to easily and interactively experiment with any user input sentence
 2. A readthedocs website to host complete API reference for our code
