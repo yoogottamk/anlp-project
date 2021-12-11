@@ -1,5 +1,10 @@
 #/usr/bin/python3
 
+"""
+Module for analysing token counts and generating graphs
+on the EuroParl dataset
+"""
+
 from collections import Counter
 import re
 from matplotlib import pyplot as plt
@@ -8,7 +13,6 @@ import pandas as pd
 from operator import itemgetter
 import os
 import sys
-from tqdm import tqdm
 
 filepath = "dataset/intermediate/de-en.tsv"
 
@@ -22,6 +26,11 @@ except:
     languages = ["de", "en"]
 
 def make_plots():
+    """
+    Display plots for token count differences
+    Using pandas series for quantile measurement
+    """
+
     de_counts, en_counts = [], []
 
     invalid_sentence_count = 0
