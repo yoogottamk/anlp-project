@@ -1,0 +1,45 @@
+markdown_extensions:
+- pymdownx.tabbed
+- pymdownx.superfences
+- pymdownx.highlight
+- pymdownx.details
+- attr_list
+- pymdownx.snippets:
+    base_path: .
+- toc:
+    permalink: true
+nav:
+- Home: index.md
+- Getting Started: install.md
+- API Reference:
+  - anlp_project:
+    - config: anlp_project/config.md
+    - train: anlp_project/train.md
+    - inference: anlp_project/inference.md
+    - utils: anlp_project/utils.md
+    - main: anlp_project/main.md
+    - datasets:
+      - convert-to-jsonl: anlp_project/datasets/convert-to-jsonl.md
+      - europarl: anlp_project/datasets/europarl.md
+    - models:
+      - transformer: anlp_project/models/transformer.md
+      - seq2seq: anlp_project/models/seq2seq.md
+plugins:
+- search
+- mkdocstrings:
+    watch:
+    - anlp_project
+repo_name: yoogottamk/anlp-project
+repo_url: https://github.com/yoogottamk/anlp_project
+site_author: Gaurang Tandon, Yoogottam Khandelwal
+site_description: Documentation for ANLP Project
+site_name: ANLP Project Documentation
+theme:
+  features:
+  - navigation.sections
+  - navigation.tabs
+  name: material
+  logo: documents/logo_transparent.png
+  palette:
+    primary: black
+    scheme: slate
